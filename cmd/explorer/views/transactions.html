@@ -1,0 +1,67 @@
+{{define "content"}}
+
+<script src="/vendors/sorttable.js"></script>
+
+<div class="section">
+  <div class="container">
+    <h1 class="title">Transactions</h1>
+    <h2 class="subtitle">last 100</h2>
+  </div>
+</div>
+
+<div class="section">
+  <div class="container">
+    <div class="card">
+      <div class="content table-container">
+        <table class="table is-hoverable is-fullwidth is-striped sortable">
+          <thead>
+            <th>Age</th>
+            <th>TxHash</th>
+            <th>Block</th>
+            <th>Value</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Result</th>
+          </thead>
+          <tbody>
+            {{range .resultLastTxs}}
+            <tr class="{{if (ne .Status "ok") }}has-background-grey-lighter{{end}}">
+              <td>{{.TimeStamp | timeago}}</td>
+              <td class="is-family-monospace">
+                <a href="/txs/{{.Transaction}}">{{.Transaction | hashtrim}}</a>
+              </td>
+              <td><a href="/blocks/{{.BlockNumber}}">{{.BlockNumber}}</a></td>
+              <td>
+                <span class="tag{{if (gt .Value 0) }} is-success{{end}}">
+                  {{.Value | balance}}
+                </span>
+              </td>
+              <td class="is-family-monospace">
+                <a href="/address/{{.From}}">{{.From | hashtrim}}</a>
+              </td>
+              <td class="is-family-monospace">
+                {{if (eq .From .To) }}⥂{{else}}⟶{{end}}
+                <a href="/address/{{.To}}">{{.To | hashtrim}}</a>
+              </td>
+              <td>
+                <div class="tags has-addons ">
+                  {{if (ne .Status "ok") }}
+                  <span class="tag is-warning">{{.Status}} {{.Method}}</span>
+                  {{else}}
+                  <span class="tag is-{{if (eq .Status "ok") }}info{{else}}danger{{end}}">{{.Method}}</span>
+                  {{end}}
+                  <span class="tag">
+                    {{.ActionValue}}
+                  </span>
+                </div>
+              </td>
+            </tr>
+            {{end}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{end}}

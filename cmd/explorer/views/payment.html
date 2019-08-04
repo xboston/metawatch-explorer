@@ -1,0 +1,68 @@
+{{define "content"}}
+
+<section class="hero is-fullheight">
+  <div class="hero-body">
+    <div class="container has-text-centered">
+      <div class="column is-7 is-offset-2">
+        <h2 class="title has-text-grey">Auto payment box {{.address | addressname}}</h2>
+        <div class="box">
+          <form action="/payment" method="POST" autocomplete="off">
+            <div class="field">
+              <div class="control">
+                <input name="to" class="input is-medium" type="text" placeholder="Send to" value="{{.address}}"
+                  autocomplete="off" minlength="52" maxlength="52" size="52" required {{.address_readonly}}>
+              </div>
+            </div>
+            <div class="field">
+              <div class="control">
+                <input name="amount" class="input is-medium" type="number" step="0.000001" placeholder="Amount MHC"
+                  value="{{.amount}}" autofocus="" required {{.amount_readonly}}>
+              </div>
+            </div>
+            <div class="field">
+              <div class="control">
+                <input name="message" class="input is-medium" type="text" placeholder="Your message" autocomplete="off"
+                  pattern1="[a-zA_Za-z0-9]{0,20}" value="{{.message}}">
+              </div>
+            </div>
+            <button id="mhsend" class="button is-block is-info is-medium is-fullwidth">Send MHC</button>
+          </form>
+        </div>
+        <article class="message is-primary">
+          <div class="message-header">
+            <p>Make your payment box</p>
+          </div>
+          <div class="message-body">
+              <div class="field">
+                  <div class="control">
+                    <input name="to" class="input" type="text" placeholder="by address" value="https://metawat.ch/payment/{address}" autocomplete="off">
+                  </div>
+              </div>
+              <div class="field">
+                  <div class="control">
+                    <input name="to" class="input" type="text" placeholder="by address & amount" value="https://metawat.ch/payment/{address}/{amount}" autocomplete="off">
+                  </div>
+              </div>
+              <div class="field">
+                  <div class="control">
+                    <input name="to" class="input" type="text" placeholder="by address & amount" value="https://metawat.ch/payment/{address}/{amount}/pay" autocomplete="off">
+                  </div>
+              </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script type="text/javascript">
+  const paymentUrl = "{{.payurl}}";
+
+  if (paymentUrl !== "") {
+    setTimeout(function () {
+      window.location = paymentUrl;
+    }, 100);
+  }
+</script>
+
+{{end}}

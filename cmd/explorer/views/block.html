@@ -1,0 +1,183 @@
+{{define "content"}}
+
+<script src="/vendors/sorttable.js"></script>
+
+<div class="section">
+    <div class="container">
+        <h1 class="title">Block: {{.block.Number}}</h1>
+        <h2 class="subtitle">{{.block.Hash}}</h2>
+    </div>
+</div>
+
+<div class="section">
+    <div class="container">
+        <div class="card">
+            <header class="card-header">
+                <p class="card-header-title">
+                    Block details
+                </p>
+            </header>
+            <div class="table-container">
+                <table class="table is-hoverable is-fullwidth is-striped">
+                    <tbody>
+                        <tr>
+                            <td>Block type:</td>
+                            <td>
+                                {{.block.Type}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Number:</td>
+                            <td>
+                                <div class="tags has-addons are-medium">
+                                    <a class="tag button" href="/blocks/{{.block.PrevNumber}}">Previous</a>
+                                    <span class="tag is-primary">{{.block.Number}}</span>
+                                    <a class="tag button" href="/blocks/{{.block.NextNumber}}">Next block</a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Transactions:</td>
+                            <td>
+                                <a href="#transactions">{{.block.CountTxs}}</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Output:</td>
+                            <td>
+                                <span class="tag is-{{if (gt .block.Output 0) }}success{{else}}light{{end}}"
+                                    title="{{.block.Output}}">{{.block.Output | balance}} MHC</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Hash:</td>
+                            <td>
+                                {{.block.Hash}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Previous block hash:</td>
+                            <td>
+                                <a href="/blocks/{{.block.PrevHash}}">{{.block.PrevHash}}</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Transaction hash:</td>
+                            <td>
+                                {{.block.TxHash}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Timestamp:</td>
+                            <td>
+                                {{.block.TimeStamp | timeago_max}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Signatures:</td>
+                            <td>
+                                <a href="#signatures">{{.block.Signatures | len}}</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Size:</td>
+                            <td>
+                                {{.block.Size | bytes}}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="container">
+        <div class="card">
+            <header class="card-header">
+                <p class="card-header-title" name="signatures" id="signatures">
+                    Block signatures
+                </p>
+            </header>
+            <div class="content table-container">
+                <table class="table is-narrow is-hoverable is-fullwidth is-striped">
+                    <thead>
+                        <th>TxHash</th>
+                        <th>Age</th>
+                        <th>From</th>
+                        <th>To</th>
+                    </thead>
+                    <tbody>
+                        {{range .block.Signatures}}
+                        <tr class="{{if (ne .Status "ok") }}has-background-grey-lighter{{end}}">
+                            <td class="is-family-monospace">
+                                <a href="/txs/{{.Transaction}}">{{.Transaction | hashtrim}}</a>
+                            </td>
+                            <td>{{.TimeStamp | timeago}}</td>
+                            <td class="is-family-monospace">
+                                <a href="/address/{{.From}}">{{.From | hashtrim}}</a>
+                            </td>
+                            <td class="is-family-monospace">
+                                {{if (eq .From .To) }}⥂{{else}}⟶{{end}}
+                                <a href="/address/{{.To}}">{{.To | hashtrim}}</a>
+                            </td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="container">
+        <div class="card">
+            <header class="card-header">
+                <p class="card-header-title" name="transactions" id="transactions">
+                    Transactions included in this block
+                </p>
+            </header>
+            <div class="content table-container">
+                <table class="table is-narrow is-hoverable is-fullwidth is-striped sortable">
+                    <thead>
+                        <th>TxHash</th>
+                        <th>Value</th>
+                        <th>Age</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Action</th>
+                    </thead>
+                    <tbody>
+                        {{range .block.Txs}}
+                        <tr class="{{if (ne .Status "ok") }}has-background-grey-lighter{{end}}">
+                            <td class="is-family-monospace">
+                                <a href="/txs/{{.Transaction}}">{{.Transaction | hashtrim}}</a>
+                            </td>
+                            <td>
+                                <span class="tag is-{{if (gt .Value 0)}}success{{end}}">
+                                    {{.Value | balance}}
+                                </span>
+                            </td>
+                            <td>{{.TimeStamp | timeago}}</td>
+                            <td class="is-family-monospace">
+                                <a href="/address/{{.From}}">{{.From | hashtrim}}</a>
+                            </td>
+                            <td class="is-family-monospace">
+                                {{if (eq .From .To) }}⥂{{else}}⟶{{end}}
+                                <a href="/address/{{.To}}">{{.To | hashtrim}}</a>
+                            </td>
+                            <td>
+                                {{.Action}}
+                            </td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{end}}

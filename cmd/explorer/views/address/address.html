@@ -1,0 +1,320 @@
+{{define "content"}}
+
+{{ $address :=.address }}
+{{ $isServerNode :=.serverNode }}
+{{ $balance := .resultBalance }}
+
+{{ template "addressheader" . }}
+
+<div class="section">
+    <div class="container">
+        <!-- <div class="columns"> -->
+        <!-- <div class="column"> -->
+        <div class="card">
+            <div class="tabs">
+                <ul>
+                    <li class="is-active"><a href="/address/{{.address}}">Adress Details</a></li>
+                    <li><a href="/address/{{.address}}/txs">Transactions</a></li>
+                    <li><a href="/address/{{.address}}/delegations">Delegations</a></li>
+                    <li><a href="/address/{{.address}}/forging">Forging</a></li>
+                    {{ if .serverNode }}
+                    <li><a href="/address/{{.address}}/info">Server information</a></li>
+                    <li><a href="/address/{{.address}}/rewards">Server rewards</a></li>
+                    <li><a href="/address/{{.address}}/server-delegations">Server delegations</a></li>
+                    {{end}}
+                </ul>
+            </div>
+            <div class="content table-container">
+                {{with .resultBalance -}}
+                <table class="table is-hoverable is-striped">
+                    <tbody>
+                        <tr>
+                            <td class="has-text-right">Current Balance:</td>
+                            <td>
+                                <span
+                                    class="tooltip is-tooltip-right tag is-medium is-{{if (gt .CurrentBalance 0) }}success{{else}}light{{end}}"
+                                    title="{{.CurrentBalance}}"
+                                    data-tooltip="in {{.Received | balance}} - out {{.Spent | balance}}">
+                                    {{.CurrentBalance | balance}} MHC
+                                </span>
+                            </td>
+                            <td class="has-text-right">Transactions:</td>
+                            <td>
+                                <a class="tooltip is-tooltip-left" href="/address/{{$address}}/txs"
+                                    data-tooltip="= in {{.CountReceived}} + out {{.CountSpent}}">{{.TransactionsCount}}</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="has-text-right">USD:</td>
+                            <td>
+                                <span class="tooltip is-tooltip-right"
+                                    data-tooltip="1 MHC = {{ 0 | current_price }} USD">
+                                    ${{.FullBalance | price}}
+                                </span>
+                            </td>
+                            <td class="has-text-right">BlockNumber:</td>
+                            <td><a href="/blocks/{{.BlockNumber}}">{{.BlockNumber}}</a></td>
+                        </tr>
+                        <tr>
+                            <td class="has-text-right">Delegated Funds:</td>
+                            <td>
+                                <a class="tooltip is-tooltip-right tag is-medium {{if (gt .DelegatedFunds 0) }}is-info{{end}}"
+                                    title="{{.DelegatedFunds}}" href="/address/{{$address}}/delegations"
+                                    data-tooltip="= in {{.Delegate | balance}} - out {{.Undelegate | balance}}">
+                                    ❄ {{.DelegatedFunds | balance}}
+                                </a>
+                            </td>
+                            <td class="has-text-right">Reserved:</td>
+                            <td>{{.Reserved}}</td>
+                        </tr>
+                        <tr>
+                            <td class="has-text-right">Forged:</td>
+                            <td>
+                                <a href="/address/{{$address}}/forging"
+                                    class="tag {{if (gt .Forged 0) }}is-info{{end}}">
+                                    🎁 {{.Forged | balance}} MHC
+                                </a>
+                            </td>
+                            <td class="has-text-right">Count Forged Ops:</td>
+                            <td><a href="/address/{{$address}}/forging">{{.CountForgedOps}}</a></td>
+                        </tr>
+                        <tr>
+                            <td class="has-text-right">Delegated:</td>
+                            <td>
+                                <a class="tooltip is-tooltip-right tag is-medium {{if (gt .DelegatedAmount 0) }}is-info{{end}}"
+                                    href="/address/{{$address}}/server-delegations" title="{{.DelegatedAmount}}"
+                                    data-tooltip="= in {{.Delegated | balance}} - out {{.Undelegated | balance}}">
+                                    ⁂ {{.DelegatedAmount | balance}}
+                                </a>
+                            </td>
+                            <td class="has-text-right">Count Delegated Ops:</td>
+                            <td><a href="/address/{{$address}}/delegations">{{.CountDelegatedOps}}</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+                {{- end}}
+            </div>
+        </div>
+    </div>
+    <!-- <div class="column is-2">
+        <div class="card">
+            <header class="card-header">
+                <p class="card-header-title">
+                    QR address
+                </p>
+            </header>
+            <div class="card-image">
+                <figure class="image is-square">
+                    <img id="qr-address" src="https://icons.metahash.io/{{$address}}" alt="QR address">
+                </figure>
+            </div>
+        </div>
+    </div> -->
+</div>
+
+
+{{ if and (gt $balance.TransactionsCount 2) (gt $balance.Received 0)  }}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/4.1.0/echarts.min.js"></script>
+<div class="section">
+    <div class="container">
+        <div class="card">
+            <header class="card-header">
+                <p class="card-header-title">
+                    Address activity
+                </p>
+            </header>
+            <div id="chart_address" style="width: 100%; min-height: 400px"></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    const chartAddress = echarts.init($('#chart_address')[0]);
+    chartAddress.showLoading();
+
+    $.get('/api/v1/address/{{.address}}/txs.json', function (rawData) {
+
+        chartAddress.hideLoading();
+        chartAddress.setOption(option = {
+            xAxis: {
+                type: 'category',
+                data: rawData.time,
+                scale: true,
+                boundaryGap: false,
+                axisLine: {
+                    onZero: false
+                },
+                splitLine: {
+                    show: false
+                },
+                min: 'dataMin',
+                max: 'dataMax',
+                axisPointer: {
+                    z: 100
+                }
+            },
+            yAxis: {
+                type: 'value',
+                boundaryGap: [0, '25%'],
+                splitLine: {
+                    show: true
+                },
+                splitArea: {
+                    show: true
+                }
+            },
+            series: [{
+                    animation: false,
+                    name: 'Incoming MHC',
+                    type: 'line',
+                    showSymbol: true,
+                    hoverAnimation: true,
+                    data: rawData.to_sum,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    smooth: true,
+                    lineStyle: {
+                        normal: {
+                            opacity: 0.5
+                        }
+                    }
+                },
+                {
+                    animation: false,
+                    name: 'Outgoing MHC',
+                    type: 'line',
+                    showSymbol: true,
+                    hoverAnimation: true,
+                    data: rawData.from_sum,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    smooth: true,
+                    lineStyle: {
+                        normal: {
+                            opacity: 0.5
+                        }
+                    }
+                },
+                {
+                    animation: false,
+                    name: 'Incoming transactions',
+                    type: 'line',
+                    showSymbol: true,
+                    hoverAnimation: true,
+                    data: rawData.to,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    smooth: true,
+                    lineStyle: {
+                        normal: {
+                            opacity: 0.5
+                        }
+                    }
+                },
+                {
+                    animation: false,
+                    name: 'Outgoing transactions',
+                    type: 'line',
+                    showSymbol: true,
+                    hoverAnimation: true,
+                    data: rawData.from,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    smooth: true,
+                    lineStyle: {
+                        normal: {
+                            opacity: 0.5
+                        }
+                    }
+                },
+            ],
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross',
+                    animation: true
+                },
+                // formatter: function (params) {
+                //     params = params[0];
+                //     return params.name + ' : ' + params.value.toLocaleString('en');
+                // },
+            },
+            legend: {
+                right: 10,
+                data: ['Incoming MHC', 'Outgoing MHC', 'Incoming transactions', 'Outgoing transactions']
+            },
+{{ if (gt $balance.TransactionsCount 250) }}
+            dataZoom: {
+                show: true,
+                realtime: true,
+                start: 50,
+                end: 100,
+            },
+{{end}}
+        }, true);
+    });
+</script>
+
+{{ if gt (.relatedItems | len) 0 }}
+
+<div class="section" name="contacts" id="contacts">
+    <div class="container">
+        <div class="card">
+            <header class="card-header">
+                <p class="card-header-title">
+                    Related Contacts (top 50)
+                </p>
+            </header>
+            <div class="content table-container">
+            <table class="table is-narrow is-hoverable is-fullwidth is-striped sortable">
+                <thead>
+                    <th>Address</th>
+                    <th>TxCount</th>
+                    <th>Amount</th>
+                </thead>
+                <tbody>
+                    {{range .relatedItems}}
+                    <tr>
+                        <td class="is-family-monospace">
+                            {{if (eq .From $address) }}<a href="/address/{{.To}}">{{.To | addressname}}</a>{{else}}<a href="/address/{{.From}}">{{.From | addressname}}</a>{{end}}
+                        </td>
+                        <td>{{.TransactionsCount}}</td>
+                        <td sorttable_customkey="{{.TransactionsAmount}}">
+                            <span class="tag is-{{if eq .From $address }}warning{{else}}success{{end}}">
+                                {{if (eq .From $address) }}-{{else}}+{{end}}
+                                {{.TransactionsAmount | balance}}
+                            </span>
+                        </td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+
+
+{{end}}
+
+<script src="/vendors/sorttable.js"></script>
+
+<!-- <script src="/vendors/qrious/qrious.min.js"></script>
+<script>
+    (function () {
+        var qr = new QRious({
+            element: document.getElementById('qr-address'),
+            value: 'metapay://{{$address}}',
+            size: 256,
+            level: 'M',
+        });
+    })();
+</script> -->
+
+{{end}}

@@ -1,0 +1,154 @@
+<!doctype html>
+<html class="no-js" lang="ru">
+
+<head>
+    <meta charset="utf-8">
+    <title>{{ .title }} - metawat.ch / beta</title>
+    <!-- <base href="https://metawat.ch/"> -->
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="apple-touch-icon" href="/icon.png?v=1">
+    <link rel="shortcut icon" href="/favicon.ico?v=1">
+
+    <link rel="stylesheet" href="/vendors/bulma/bulma.min.css">
+    <link rel="stylesheet" href="/vendors/bulma-badge.min.css">
+    <link rel="stylesheet" href="/vendors/bulma/bulma-tooltip.min.css">
+
+    <!-- <link rel="stylesheet" href="https://jenil.github.io/bulmaswatch/flatly/bulmaswatch.min.css"> -->
+    <!-- <link rel="stylesheet" href="https://jenil.github.io/bulmaswatch/nuclear/bulmaswatch.min.css"> -->
+    <!-- <link rel="stylesheet" href="https://jenil.github.io/bulmaswatch/sandstone/bulmaswatch.min.css"> -->
+
+    <link rel="stylesheet" href="/css/main.css?v=newway">
+
+    <script src="/vendors/jquery.min.js"></script>
+</head>
+
+<body class="has-background-white-bis has-navbar-fixed-top">
+
+    <nav id="navbar" class="navbar is-fixed-top has-shadow navbar-spaced">
+        <div class="container">
+            <div class="navbar-brand">
+                <a class="button has-badge-rounded has-badge-info has-badge-outlined" data-badge="beta" href="/"
+                    id="logo">
+                    <span>
+                        METAWAT.CH
+                    </span>
+                </a>
+
+                <div id="navbarBurger" class="navbar-burger burger" data-target="navMenu" aria-label="menu"
+                    aria-expanded="false">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+
+            <div class="navbar-menu" id="navMenu">
+                <div class="navbar-start">
+                    <a class="navbar-item bd-navbar-item-documentation " href="/status">
+                        Status board
+                    </a>
+                    <div class="navbar-item has-dropdown is-hoverable">
+                        <a class="navbar-link">
+                            Explorer
+                        </a>
+                        <div class="navbar-dropdown">
+                            <a class="navbar-item bd-navbar-item-documentation " href="/blocks">
+                                Blocks
+                            </a>
+                            <a class="navbar-item" href="/txs">
+                                Transactions
+                            </a>
+                            <a class="navbar-item bd-navbar-item-documentation " href="/nodes">
+                                Nodes
+                            </a>
+                            <a class="navbar-item bd-navbar-item-documentation " href="/address">
+                                TOP Addresses
+                            </a>
+                            <a class="navbar-item bd-navbar-item-documentation " href="/txs/top">
+                                TOP Transaction
+                            </a>
+                            <a class="navbar-item" href="/forging">
+                                Forging
+                            </a>
+                            <a class="navbar-item" href="/address/0x0074bd5765caf18e0750e210b870edb6c8c55fb39e1674c300">
+                                MetaGather Award
+                            </a>
+                            <a class="navbar-item bd-navbar-item-documentation " href="/address/0x00000000000000000000000000000000000000000000000000">
+                                Burning
+                            </a>
+                        </div>
+                    </div>
+                    <div class="navbar-item has-dropdown is-hoverable">
+                        <a class="navbar-link">
+                            Markets
+                        </a>
+                        <div class="navbar-dropdown">
+                            <a class="navbar-item" href="/address/0x0039f42ad734606d250ea0b0151d4aeab6b4edc6587c4b27ef">
+                                KuCoin
+                            </a>
+                            <a class="navbar-item" href="/address/0x0033626a3977271fd3d1c47e05e3f34c69f38661bdebacad65">
+                                KuCoin 2
+                            </a>
+                            <!-- <a class="navbar-item" href="/address/0x00caf0eabb785d3a1e2311cd746681ff7cfa55e0e62c35bb75">
+                                BitForex
+                            </a> -->
+                            <a class="navbar-item" href="/address/0x00a8a58f6cdce810bafc58be25783a0ba6c917dd82d302d404">
+                                Bit-Z|BitZ
+                            </a>
+                            <a class="navbar-item" href="/address/0x005b891007c2000fee08e085beb91494f1d3753eb8eee354f0">
+                                CEX.IO
+                            </a>
+                        </div>
+                    </div>
+                    <a class="navbar-item" href="/map">
+                        GEO
+                    </a>
+                    <a class="navbar-item" href="/payment">
+                        Metapay
+                    </a>
+                    <!-- <a class="navbar-item" href="/about">
+                        About
+                    </a> -->
+                </div>
+            </div>
+            {{ if not .hideSmallSearch }}
+            <div class="navbar-end">
+                <form action="/search" method="GET">
+                    <div class="navbar-item">
+                        <div class="field has-addons">
+                            <div class="control is-expanded">
+                                <input id="search_q" class="input" type="text" placeholder="Address / Txhash / Block"
+                                    name="q" value="{{.q}}" size="25" autocomplete="off" required>
+                            </div>
+                            <div class="control">
+                                <button class="button is-info" type="submit">
+                                    Search
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            {{ end }}
+        </div>
+        </div>
+    </nav>
+    <div id="space-delimiter" class=""><br /></div>
+
+    {{template "content" .}}
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(".navbar-burger").click(function () {
+                $(".navbar-burger").toggleClass("is-active");
+                $(".navbar-menu").toggleClass("is-active");
+            });
+        });
+    </script>
+
+    {{include "partials/counters"}}
+</body>
+
+</html>

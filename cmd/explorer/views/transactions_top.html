@@ -1,0 +1,168 @@
+{{define "content"}}
+
+<script src="/vendors/sorttable.js"></script>
+
+<div class="section">
+    <div class="container">
+        <h1 class="title">Top transactions</h1>
+        <h2 class="subtitle">24 hours</h2>
+    </div>
+</div>
+
+<div class="section">
+    <div class="container">
+        <div class="card">
+            <header class="card-header">
+                <p class="card-header-title">
+                    Top {{.topLimit}} by transaction value
+                </p>
+            </header>
+            <div class="content table-container">
+                <table class="table is-hoverable is-fullwidth is-striped sortable">
+                    <thead>
+                        <th>Age</th>
+                        <th>TxHash</th>
+                        <th>Block</th>
+                        <th>Value</th>
+                        <th>From</th>
+                        <th>To</th>
+                    </thead>
+                    <tbody>
+                        {{range .valuePoints}}
+                        <tr>
+                            <td>{{.TimeStamp | timeago_time}}</td>
+                            <td class="is-family-monospace">
+                                <a href="/txs/{{.Transaction}}">{{.Transaction | hashtrim}}</a>
+                            </td>
+                            <td><a href="/blocks/{{.BlockNumber}}">{{.BlockNumber}}</a></td>
+                            <td>
+                                <span class="tag{{if (gt .Value 0) }} is-success{{end}}">
+                                    {{.Value | balance}}
+                                </span>
+                            </td>
+                            <td class="is-family-monospace">
+                                <a href="/address/{{.From}}">{{.From | hashtrim}}</a>
+                            </td>
+                            <td class="is-family-monospace">
+                                {{if (eq .From .To) }}⥂{{else}}⟶{{end}}
+                                <a href="/address/{{.To}}">{{.To | hashtrim}}</a>
+                            </td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="section">
+    <div class="container">
+        <div class="columns">
+
+            <div class="column">
+                <div class="card">
+                    <header class="card-header">
+                        <p class="card-header-title">
+                            Top {{.topLimit}} by total revenue
+                        </p>
+                    </header>
+                    <div class="content table-container">
+                        <table class="table is-hoverable is-fullwidth is-striped sortable">
+                            <thead>
+                                <th>To</th>
+                                <th>Value</th>
+                            </thead>
+                            <tbody>
+                                {{range .amountToPoints}}
+                                <tr>
+                                    <td class="is-family-monospace">
+                                        <a href="/address/{{.To}}">{{.To | addressname}}</a>
+                                    </td>
+                                    <td>
+                                        <span class="tag is-success">
+                                            {{.Value | balance}}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {{end}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="column">
+                <div class="card">
+                    <header class="card-header">
+                        <p class="card-header-title">
+                            Top {{.topLimit}} by total spending
+                        </p>
+                    </header>
+                    <div class="content table-container">
+                        <table class="table is-hoverable is-fullwidth is-striped sortable">
+                            <thead>
+                                <th>From</th>
+                                <th>Value</th>
+                            </thead>
+                            <tbody>
+                                {{range .amountFromPoints}}
+                                <tr>
+                                    <td class="is-family-monospace">
+                                        <a href="/address/{{.From}}">{{.From | addressname}}</a>
+                                    </td>
+                                    <td>
+                                        <span class="tag is-warning">
+                                            - {{.Value | balance}}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {{end}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="container">
+        <div class="card">
+            <header class="card-header">
+                <p class="card-header-title">
+                    Top {{.topLimit}} transaction values
+                </p>
+            </header>
+            <div class="content table-container">
+                <table class="table is-hoverable is-fullwidth is-striped sortable">
+                    <thead>
+                        <th>MHC</th>
+                        <th>Transactions count</th>
+                    </thead>
+                    <tbody>
+                        {{range .byValuePoints}}
+                        <tr>
+                            <td>
+                                <span class="tag is-success">
+                                    {{.Value | balance}}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="tag">
+                                    {{.TransactionsCount}}
+                                </span>
+                            </td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{end}}

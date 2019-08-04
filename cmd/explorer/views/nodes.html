@@ -1,0 +1,52 @@
+{{define "content"}}
+
+<div class="section">
+  <div class="container">
+    <h1 class="title">Node registration</h1>
+    <h2 class="subtitle">updates</h2>
+  </div>
+</div>
+
+<div class="section">
+  <div class="container">
+    <div class="card">
+      <div class="card-content">
+        {{.pagination.Render}}
+      </div>
+      <div class="table-container">
+        <table class="table is-hoverable is-fullwidth is-striped is-striped">
+          <thead>
+            <th>Updated</th>
+            <th>Type</th>
+            <th>Node name</th>
+            <th>Address</th>
+          </thead>
+          <tbody>
+            {{range .resultHistory}}
+            <tr {{if (ne .Status "ok") }}class="has-background-danger" {{end}}>
+              <td>
+                <a href="/txs/{{.Transaction}}">{{.TimeStamp | timeago_raw}}</a>
+              </td>
+              <td>
+                  {{ .NodeType }}
+              </td>
+              <td>
+                  {{ .NodeName }}
+              </td>
+              <td>
+                <a class="is-family-monospace" href="/address/{{.From}}">{{ .From }}</a>
+              </td>
+            </tr>
+            {{end}}
+          </tbody>
+        </table>
+      </div>
+        <div class="card-content">
+          {{.pagination.Render}}
+        </div>
+    </div>
+  </div>
+</div>
+
+
+{{end}}

@@ -1,0 +1,54 @@
+{{define "content"}}
+
+<div class="section">
+    <div class="container">
+        <h1 class="title">MHC addresses</h1>
+        <h2 class="subtitle">TOP {{.limit}}</h2>
+    </div>
+</div>
+
+<div class="section">
+    <div class="container">
+        <div class="card">
+            <div class="content table-container">
+                <table class="table is-narrow is-hoverable is-fullwidth sortable is-striped">
+                    <thead>
+                        <th>Address</th>
+                        <th><a href="/address">Balance</a></th>
+                        <th><a href="/address?sort=frozen">Delegate</a></th>
+                        <th><a href="/address?sort=forging">Forged bonus</a></th>
+                        <th><a href="/address?sort=txs">Tx count</a></th>
+                    </thead>
+                    <tbody>
+                        {{range $num, $o := .listsAddress}}
+                        <tr>
+                            <td class="is-family-monospace">
+                                <a href="/address/{{.Address}}">{{.Address | addressname}}</a>
+                            </td>
+                            <td sorttable_customkey="{{.Amount}}">
+                                <div class="tags has-addons">
+                                    <span 
+                                        class="tooltip is-tooltip-right tag is-{{if (gt .Amount 0) }}success{{else}}light{{end}}"
+                                        data-tooltip="Last checked {{.UpdatedAt | timeago_time}}">
+                                        {{.Amount | balance }} MHC
+                                    </span>
+                                </div>
+                            </td>
+                            <td>❄ {{.Frozen | balance}}</td>
+                            <td sorttable_customkey="{{.Forging}}">
+                                <span class="tag is-light">
+                                    {{.Forging | balance}} MHC
+                                </span>
+                            </td>
+                            <td><a href="/address/{{.Address}}/txs">{{.TxCount}}</a></td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{end}}

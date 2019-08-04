@@ -1,0 +1,18 @@
+[Unit]
+Description=Explorer service (instance %i)
+After=network.target clickhouse-server.service mysql.service
+Requires=network.target clickhouse-server.service mysql.service
+
+[Service]
+WorkingDirectory=/var/www/apps/explorer
+Type=simple
+User=www-data
+Group=www-data
+ExecStart=/var/www/apps/explorer/explorer
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+RestartSec=10
+
+
+[Install]
+WantedBy=multi-user.target

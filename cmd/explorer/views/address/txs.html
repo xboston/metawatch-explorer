@@ -1,0 +1,88 @@
+{{define "content"}}
+{{$walletAddress:=.address}}
+
+{{ template "addressheader" . }}
+
+<div class="section">
+    <div class="container">
+        <div class="card">
+            <div class="tabs">
+                <ul>
+                    <li><a href="/address/{{.address}}">Adress Details</a></li>
+                    <li class="is-active"><a href="/address/{{.address}}/txs">Transactions</a></li>
+                    <li><a href="/address/{{.address}}/delegations">Delegations</a></li>
+                    <li><a href="/address/{{.address}}/forging">Forging</a></li>
+                    {{ if .serverNode }}
+                    <li><a href="/address/{{.address}}/info">Server information</a></li>
+                    <li><a href="/address/{{.address}}/rewards">Server rewards</a></li>
+                    <li><a href="/address/{{.address}}/server-delegations">Server delegations</a></li>
+                    {{end}}
+                </ul>
+            </div>
+            <div class="content table-container">
+                <table class="table is-narrow is-hoverable is-fullwidth is-striped">
+                    <thead>
+                        <th>Age</th>
+                        <th>Block</th>
+                        <th>TxHash</th>
+                        <th>Value</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Result</th>
+                    </thead>
+                    <tbody>
+                        {{range .resultHistory}}
+                        <tr class="{{if (ne .Status "ok") }}has-background-grey-lighter{{end}}">
+                            <td>{{.TimeStamp | timeago}}</td>
+                            <td><a href="/blocks/{{.BlockNumber}}">{{.BlockNumber}}</a></td>
+                            <td class="is-family-monospace">
+                                <a href="/txs/{{.Transaction}}">{{.Transaction | hashtrim}}</a>
+                            </td>
+                            <td>
+                                <span class="tag is-{{if and (eq .From $walletAddress) (gt .Value 0) }}warning{{ else if (eq .Value 0) }}{{else}}success{{end}}">
+                                    {{if and (eq .From $walletAddress) (gt .Value 0) }}-{{ else if (eq .Value 0) }}{{else}}+{{end}}
+                                    {{.Value | balance}}
+                                </span>
+                            </td>
+                            <td class="is-family-monospace">
+                                <a href="/address/{{.From}}">{{.From | hashtrim}}</a>
+                            </td>
+                            <td class="is-family-monospace">
+                                {{if (eq .From .To) }}⥂{{else}}⟶{{end}}
+                                <a href="/address/{{.To}}">{{.To | hashtrim}}</a>
+                            </td>
+                            <td class="is-family-monospace">
+                                <div class="tags has-addons ">
+                                    <span class="tag is-{{if (ne .Status "ok") }}warning{{end}}">{{.Action}}</span>
+                                    <span class="tag">
+                                        {{.ActionValue}}
+                                    </span>
+                                </div>
+                            </td>
+                        </tr>
+                        {{else}}
+                        <tr>
+                            <td colspan="7" class="has-text-centered">
+                                <section class="hero">
+                                    <div class="hero-body">
+                                        <div class="container">
+                                            <h6 class="title">
+                                                Empty
+                                            </h6>
+                                        </div>
+                                    </div>
+                                </section>
+                            </td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-content">
+                {{.pagination.Render}}
+            </div>
+        </div>
+    </div>
+</div>
+
+{{end}}

@@ -1,0 +1,169 @@
+{{define "content"}}
+
+<script src="/vendors/sorttable.js"></script>
+
+<div class="section">
+    <div class="container">
+        <h1 class="title">Blocks</h1>
+    </div>
+</div>
+
+{{ if (lt .currentPage 2) }}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/4.1.0/echarts.min.js"></script>
+<div class="section">
+    <div class="container">
+        <div class="card">
+            <header class="card-header">
+                <p class="card-header-title">
+                    Blocks by day
+                </p>
+            </header>
+            <div id="chart_blocks" style="width: 100%; min-height: 400px"></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    const chartBlocks = echarts.init($('#chart_blocks')[0]);
+    chartBlocks.showLoading();
+
+    $.get('/api/v1/status/blocks.json', function (rawData) {
+
+        chartBlocks.hideLoading();
+        chartBlocks.setOption(option = {
+            xAxis: {
+                type: 'category',
+                data: rawData.date,
+                scale: true,
+                boundaryGap: false,
+                axisLine: {
+                    onZero: false
+                },
+                splitLine: {
+                    show: false
+                },
+                min: 'dataMin',
+                max: 'dataMax',
+                axisPointer: {
+                    z: 100
+                }
+            },
+            yAxis: {
+                type: 'value',
+                boundaryGap: [0, '25%'],
+                splitLine: {
+                    show: true
+                },
+                splitArea: {
+                    show: true
+                }
+            },
+            series: {
+                animation: false,
+                name: 'Transactions',
+                type: 'line',
+                showSymbol: true,
+                hoverAnimation: true,
+                data: rawData.block_counts  ,
+                areaStyle: {
+                    normal: {}
+                },
+                smooth: true,
+                lineStyle: {
+                    normal: {
+                        opacity: 0.5
+                    }
+                }
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross',
+                    animation: true
+                },
+                formatter: function (params) {
+                    params = params[0];
+                    return params.name + ' : ' + params.value.toLocaleString('en');
+                },
+            },
+            dataZoom: {
+                show: true,
+                realtime: true,
+                start: 85,
+                end: 100,
+            },
+            toolbox: {
+                top: 50,
+                right: 50,
+                orient: 'vertical',
+                feature: {
+                    dataZoom: {
+                        title: "Zoom",
+                        yAxisIndex: 'none',
+                    },
+                    saveAsImage: {
+                        title: "Save as image",
+                        pixelRatio: 2
+                    },
+                    restore: {
+                        title: "Restore"
+                    },
+                }
+            },
+        }, true);
+    });
+</script>
+
+{{ end }}
+
+<div class="section">
+    <div class="container">
+        <div class="card">
+            <div class="card-content">
+                {{.pagination.Render}}
+            </div>
+            <div class="content table-container">
+                <table class="table is-hoverable is-fullwidth sortable is-striped">
+                    <thead>
+                        <th>Age</th>
+                        <th>Block</th>
+                        <th>Hash</th>
+                        <th>Txns</th>
+                        <th>Signatures</th>
+                        <th>Size</th>
+                    </thead>
+                    <tbody>
+                        {{range .resultBlocks}}
+                        <tr>
+                            <td>
+                                {{.TimeStamp | timeago}}
+                            </td>
+                            <td class="is-family-monospace">
+                                <a href="/blocks/{{.Number}}">{{.Number}}</a>
+                            </td>
+                            <td class="is-family-monospace">
+                                <a href="/blocks/{{.Hash}}">{{.Hash | hashtrim}}</a>
+                            </td>
+                            <td>
+                                <a href="/blocks/{{.Hash}}#transactions">{{.CountTxs}}</a>
+                            </td>
+                            <td>
+                                <a href="/blocks/{{.Hash}}#signatures">{{.Signatures | len}}</a>
+                            </td>
+                            <td>
+                                {{.Size | bytes}}
+                            </td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-content">
+                {{.pagination.Render}}
+            </div>
+        </div>
+    </div>
+</div>
+
+{{end}}

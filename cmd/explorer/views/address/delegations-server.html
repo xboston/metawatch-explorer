@@ -1,0 +1,79 @@
+{{define "content"}}
+{{$walletAddress:=.address}}
+
+{{ template "addressheader" . }}
+
+<script src="/vendors/sorttable.js"></script>
+
+<div class="section">
+    <div class="container">
+        <div class="card">
+            <div class="tabs">
+                <ul>
+                    <li><a href="/address/{{.address}}">Adress Details</a></li>
+                    <li><a href="/address/{{.address}}/txs">Transactions</a></li>
+                    <li><a href="/address/{{.address}}/delegations">Delegations</a></li>
+                    <li><a href="/address/{{.address}}/forging">Forging</a></li>
+                    {{ if .serverNode }}
+                    <li><a href="/address/{{.address}}/info">Server information</a></li>
+                    <li><a href="/address/{{.address}}/rewards">Server rewards</a></li>
+                    <li class="is-active"><a href="/address/{{.address}}/server-delegations">Server delegations</a></li>
+                    {{end}}
+                </ul>
+            </div>
+            <div class="content table-container">
+                <table class="table is-narrow is-hoverable is-fullwidth is-striped sortable">
+                    <thead>
+                        <th>Age</th>
+                        <th>Block</th>
+                        <th>TxHash</th>
+                        <th>Action</th>
+                        <th>From</th>
+                    </thead>
+                    <tbody>
+                        {{range .resultHistory}}
+                        <tr>
+                            <td>{{.TimeStamp | timeago}}</td>
+                            <td><a href="/blocks/{{.BlockNumber}}">{{.BlockNumber}}</a></td>
+                            <td class="is-family-monospace">
+                                <a href="/txs/{{.Transaction}}">{{.Transaction | hashtrim}}</a>
+                            </td>
+                            <td class="is-family-monospace" sorttable_customkey="{{.Delegate}}">
+                                <div class="tags has-addons ">
+                                    <span class="tag is-{{if (eq .Status "undelegate") }}warning{{else}}success{{end}}">
+                                        {{.Status}}
+                                    </span>
+                                    {{if (eq .Status "delegate") }}
+                                    <span class="tag">{{.Delegate | balance}}</span>
+                                    {{ else }}
+                                    <span class="tag">{{.Delegate | balance}}</span>
+                                    {{end}}
+                                </div>
+                            </td>
+                            <td class="is-family-monospace">
+                                <a href="/address/{{.From}}">{{.From | hashtrim}}</a>
+                            </td>
+                        </tr>
+                        {{else}}
+                        <tr>
+                            <td colspan="5" class="has-text-centered">
+                                <section class="hero">
+                                    <div class="hero-body">
+                                        <div class="container">
+                                            <h6 class="title">
+                                                Empty
+                                            </h6>
+                                        </div>
+                                    </div>
+                                </section>
+                            </td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{end}}

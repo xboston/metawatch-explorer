@@ -1,0 +1,75 @@
+{{define "content"}}
+
+{{$nodeHash:=.address}}
+
+{{ template "addressheader" . }}
+
+<div class="section">
+    <div class="container">
+        <div class="card">
+            <div class="tabs">
+                <ul>
+                    <li><a href="/address/{{.address}}">Adress Details</a></li>
+                    <li><a href="/address/{{.address}}/txs">Transactions</a></li>
+                    <li><a href="/address/{{.address}}/delegations">Delegations</a></li>
+                    <li><a href="/address/{{.address}}/forging">Forging</a></li>
+                    {{ if .serverNode }}
+                    <li><a href="/address/{{.address}}/info">Server information</a></li>
+                    <li class="is-active"><a href="/address/{{.address}}/rewards">Server rewards</a></li>
+                    <li><a href="/address/{{.address}}/server-delegations">Server delegations</a></li>
+                    {{end}}
+                </ul>
+            </div>
+            <div class="content table-container">
+                <table class="table is-narrow is-hoverable is-fullwidth is-striped">
+                    <thead>
+                        <th>Age</th>
+                        <th>Block</th>
+                        <th>TxHash</th>
+                        <th>Value</th>
+                    </thead>
+                    <tbody>
+                        {{range .resultHistory}}
+                        <tr class="{{if (ne .Status "ok") }}has-background-grey-lighter{{end}}">
+                            <td>{{.TimeStamp | timeago}}</td>
+                            <td><a href="/blocks/{{.BlockNumber}}">{{.BlockNumber}}</a></td>
+                            <td class="is-family-monospace">
+                                <a href="/txs/{{.Transaction}}">{{.Transaction | hashtrim}}</a>
+                            </td>
+                            <td>
+                                <div class="tags has-addons ">
+                                    <span class="tag is-{{if (eq .From $nodeHash) }}warning{{else}}success{{end}}">
+                                        {{if (eq .From $nodeHash) }}-{{else}}+{{end}}
+                                    </span>
+                                    <span class="tag is-info">
+                                        {{if (eq .IntStatus 102) }}Node reward{{else}}Coin reward{{end}}
+                                    </span>
+                                    <span class="tag">
+                                        {{.Value | balance}}
+                                    </span>
+                                </div>
+                            </td>
+                        </tr>
+                        {{else}}
+                        <tr>
+                            <td colspan="5" class="has-text-centered">
+                                <section class="hero">
+                                    <div class="hero-body">
+                                        <div class="container">
+                                            <h6 class="title">
+                                                Empty
+                                            </h6>
+                                        </div>
+                                    </div>
+                                </section>
+                            </td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{end}}

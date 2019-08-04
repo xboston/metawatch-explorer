@@ -1,0 +1,1071 @@
+{{define "content"}}
+
+<link rel="stylesheet" href="/css/bulma-divider.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/4.1.0/echarts.min.js"></script>
+
+<div class="section">
+    <div class="container">
+        <h1 class="title">MetaHash TraceChain</h1>
+        <h2 class="subtitle">Status board</h2>
+    </div>
+</div>
+
+<div class="section">
+    <div class="container">
+        <div class="card">
+            <div class="card-content">
+                <div class="columns custom-columns">
+                    <div class="column">
+                        <div>
+                            <p class="heading has-text-grey-light is-lowercase">24h turnover</p>
+                            <p class="subtitle has-text-success">{{.sumValue | balance}}</p>
+                        </div>
+                        <div>
+                            <p class="heading has-text-grey-light is-lowercase">24h max value</p>
+                            <a class="subtitle has-text-info" href="/txs/top">{{.maxValue | balance}}</a>
+                        </div>
+                    </div>
+                    <div class="is-divider-vertical"></div>
+                    <div class="column">
+                        <div>
+                            <p class="heading has-text-grey-light is-lowercase">24h TPS max</p>
+                            <p class="subtitle">{{.tpsMax | bignumber}}</p>
+                        </div>
+                        <div>
+                            <p class="heading has-text-grey-light is-lowercase">24h TPS avg</p>
+                            <p class="subtitle">{{.tpsAvg | bignumber}}</p>
+                        </div>
+                    </div>
+                    <div class="is-divider-vertical"></div>
+                    <div class="column">
+                        <div>
+                            <p class="heading has-text-grey-light is-lowercase">block count</p>
+                            <a class="subtitle has-text-info" href="/blocks/{{.maxBlockNumber}}">{{.maxBlockNumber | bignumber}}</a>
+                        </div>
+                        <div>
+                            <p class="heading has-text-grey-light is-lowercase">trx count</p>
+                            <a class="subtitle has-text-info" href="/txs">{{.trxCount | bignumber}}</a>
+                        </div>
+                    </div>
+                    <div class="is-divider-vertical"></div>
+                    <div class="column">
+                        <div>
+                            <p class="heading has-text-grey-light is-lowercase">nodes count</p>
+                            <a class="subtitle has-text-info" href="/map">{{.nodesCount | bignumber}}</a>
+                        </div>
+                        <div>
+                            <p class="heading has-text-grey-light is-lowercase">24h updated nodes</p>
+                            <a class="subtitle has-text-info" href="/nodes">{{.nodes24h | bignumber}}</a>
+                        </div>
+                    </div>
+                    <div class="is-divider-vertical"></div>
+                    <div class="column">
+                        <div>
+                            <p class="heading has-text-grey-light is-lowercase">total known addresses</p>
+                            <p class="subtitle">{{.walletsCount | bignumber}}</p>
+                        </div>
+                        <div>
+                            <p class="heading has-text-grey-light is-lowercase">active addresses in last 24h (not
+                                forging, not online)</p>
+                            <p class="subtitle">{{.wallets24h | bignumber}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="container">
+        <div class="card">
+            <header class="card-header">
+                <p class="card-header-title">
+                    Blocks
+                </p>
+            </header>
+            <div id="chart_blocks" style="width: 100%; min-height: 400px"></div>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="container">
+        <div class="card">
+            <header class="card-header">
+                <p class="card-header-title">
+                    Transactions
+                </p>
+            </header>
+            <div id="chart_trx_date" style="width: 100%; min-height: 400px"></div>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="container">
+        <div class="card">
+            <header class="card-header">
+                <p class="card-header-title">
+                    Network daily turnover
+                </p>
+            </header>
+            <div id="chart_coins" style="width: 100%; min-height: 400px"></div>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="container">
+        <div class="card">
+            <header class="card-header">
+                <p class="card-header-title">
+                    Transactions (last 24h)
+                </p>
+            </header>
+            <div id="chart_trx" style="width: 100%; min-height: 400px"></div>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="container">
+        <div class="card">
+            <header class="card-header">
+                <p class="card-header-title">
+                    Wallets
+                </p>
+            </header>
+            <div id="chart_wallets" style="width: 100%; min-height: 400px"></div>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="container">
+        <div class="card">
+            <header class="card-header">
+                <p class="card-header-title">
+                    Delegate transactions
+                </p>
+            </header>
+            <div id="chart_delagations" style="width: 100%; min-height: 400px"></div>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="container">
+        <div class="card">
+            <header class="card-header">
+                <p class="card-header-title">
+                    Delegate MHC
+                </p>
+            </header>
+            <div id="chart_delagation_sum" style="width: 100%; min-height: 400px"></div>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="container">
+        <div class="card">
+            <header class="card-header">
+                <p class="card-header-title">
+                    Forging transactions
+                </p>
+            </header>
+            <div id="chart_forging" style="width: 100%; min-height: 400px"></div>
+        </div>
+    </div>
+</div>
+
+<div class="section" name="chart_blocks_size">
+    <div class="container">
+        <div class="card">
+            <header class="card-header">
+                <p class="card-header-title">
+                    Blockchain size
+                </p>
+            </header>
+            <div id="chart_blocks_size" style="width: 100%; min-height: 400px"></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    const chartTRX = echarts.init($('#chart_trx')[0]);
+    const chartCoins = echarts.init($('#chart_coins')[0]);
+    const chartTRXdate = echarts.init($('#chart_trx_date')[0]);
+    const chartWallets = echarts.init($('#chart_wallets')[0]);
+    const chartDelagations = echarts.init($('#chart_delagations')[0]);
+    const chartDelagationsSum = echarts.init($('#chart_delagation_sum')[0]);
+    const chartForging = echarts.init($('#chart_forging')[0]);
+    const chartBlocks = echarts.init($('#chart_blocks')[0]);
+    const chartBlocksSize = echarts.init($('#chart_blocks_size')[0]);
+
+    chartTRXdate.showLoading();
+    chartCoins.showLoading();
+    chartTRX.showLoading();
+    chartWallets.showLoading();
+    chartDelagations.showLoading();
+    chartDelagationsSum.showLoading();
+    chartForging.showLoading();
+    chartBlocks.showLoading();
+    chartBlocksSize.showLoading();
+
+    $.get('/api/v1/status/txs_date.json', function (rawData) {
+
+        chartTRXdate.hideLoading();
+        chartTRXdate.setOption(option = {
+            xAxis: {
+                type: 'category',
+                data: rawData.time,
+                scale: true,
+                boundaryGap: false,
+                axisLine: {
+                    onZero: false
+                },
+                splitLine: {
+                    show: false
+                },
+                min: 'dataMin',
+                max: 'dataMax',
+                axisPointer: {
+                    z: 100
+                }
+            },
+            yAxis: {
+                type: 'value',
+                boundaryGap: [0, '25%'],
+                splitLine: {
+                    show: true
+                },
+                splitArea: {
+                    show: true
+                }
+            },
+            series: {
+                animation: false,
+                name: 'Transactions',
+                type: 'line',
+                showSymbol: true,
+                hoverAnimation: true,
+                data: rawData.trx,
+                areaStyle: {
+                    normal: {}
+                },
+                smooth: true,
+                lineStyle: {
+                    normal: {
+                        opacity: 0.5
+                    }
+                }
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross',
+                    animation: true
+                },
+                formatter: function (params) {
+                    params = params[0];
+                    return params.name + ' : ' + params.value.toLocaleString('en');
+                },
+            },
+            dataZoom: {
+                show: true,
+                realtime: true,
+                start: 85,
+                end: 100,
+            },
+            toolbox: {
+                top: 50,
+                right: 50,
+                orient: 'vertical',
+                feature: {
+                    dataZoom: {
+                        title: "Zoom",
+                        yAxisIndex: 'none',
+                    },
+                    saveAsImage: {
+                        title: "Save as image",
+                        pixelRatio: 2
+                    },
+                    restore: {
+                        title: "Restore"
+                    },
+                }
+            },
+        }, true);
+    });
+
+    $.get('/api/v1/status/txs.json', function (rawData) {
+
+        chartTRX.hideLoading();
+        chartTRX.setOption(option = {
+            xAxis: {
+                type: 'category',
+                data: rawData.time,
+                scale: true,
+                boundaryGap: false,
+                axisLine: {
+                    onZero: false
+                },
+                splitLine: {
+                    show: false
+                },
+                min: 'dataMin',
+                max: 'dataMax',
+                axisPointer: {
+                    z: 100
+                }
+            },
+            yAxis: {
+                type: 'value',
+                boundaryGap: [0, '25%'],
+                splitLine: {
+                    show: true
+                },
+                splitArea: {
+                    show: true
+                }
+            },
+            series: {
+                animation: false,
+                name: 'Transactions',
+                type: 'line',
+                showSymbol: true,
+                hoverAnimation: true,
+                data: rawData.trx,
+                areaStyle: {
+                    normal: {}
+                },
+                smooth: true,
+                lineStyle: {
+                    normal: {
+                        opacity: 0.5
+                    }
+                }
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross',
+                    animation: true
+                },
+                formatter: function (params) {
+                    params = params[0];
+                    return params.name + ' : ' + params.value.toLocaleString('en');
+                },
+            },
+            dataZoom: {
+                show: true,
+                realtime: true,
+                start: 85,
+                end: 100,
+            },
+            toolbox: {
+                top: 50,
+                right: 50,
+                orient: 'vertical',
+                feature: {
+                    dataZoom: {
+                        title: "Zoom",
+                        yAxisIndex: 'none',
+                    },
+                    saveAsImage: {
+                        title: "Save as image",
+                        pixelRatio: 2
+                    },
+                    restore: {
+                        title: "Restore"
+                    },
+                }
+            },
+        }, true);
+    });
+
+    $.get('/api/v1/status/blocks.json', function (rawData) {
+
+        chartBlocks.hideLoading();
+        chartBlocks.setOption(option = {
+            xAxis: {
+                type: 'category',
+                data: rawData.date,
+                scale: true,
+                boundaryGap: false,
+                axisLine: {
+                    onZero: false
+                },
+                splitLine: {
+                    show: false
+                },
+                min: 'dataMin',
+                max: 'dataMax',
+                axisPointer: {
+                    z: 100
+                }
+            },
+            yAxis: {
+                type: 'value',
+                boundaryGap: [0, '25%'],
+                splitLine: {
+                    show: true
+                },
+                splitArea: {
+                    show: true
+                }
+            },
+            series: {
+                animation: false,
+                name: 'Transactions',
+                type: 'line',
+                showSymbol: true,
+                hoverAnimation: true,
+                data: rawData.block_counts,
+                areaStyle: {
+                    normal: {}
+                },
+                smooth: true,
+                lineStyle: {
+                    normal: {
+                        opacity: 0.5
+                    }
+                }
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross',
+                    animation: true
+                },
+                formatter: function (params) {
+                    params = params[0];
+                    return params.name + ' : ' + params.value.toLocaleString('en');
+                },
+            },
+            dataZoom: {
+                show: true,
+                realtime: true,
+                start: 85,
+                end: 100,
+            },
+            toolbox: {
+                top: 50,
+                right: 50,
+                orient: 'vertical',
+                feature: {
+                    dataZoom: {
+                        title: "Zoom",
+                        yAxisIndex: 'none',
+                    },
+                    saveAsImage: {
+                        title: "Save as image",
+                        pixelRatio: 2
+                    },
+                    restore: {
+                        title: "Restore"
+                    },
+                }
+            },
+        }, true);
+    });
+
+
+    $.get('/api/v1/status/delegations.json', function (rawData) {
+
+        chartDelagations.hideLoading();
+        chartDelagations.setOption(option = {
+            xAxis: {
+                type: 'category',
+                data: rawData.time,
+                scale: true,
+                boundaryGap: false,
+                axisLine: {
+                    onZero: false
+                },
+                splitLine: {
+                    show: false
+                },
+                min: 'dataMin',
+                max: 'dataMax',
+                axisPointer: {
+                    z: 100
+                }
+            },
+            yAxis: {
+                type: 'value',
+                boundaryGap: [0, '25%'],
+                splitLine: {
+                    show: true
+                },
+                splitArea: {
+                    show: true
+                }
+            },
+            series: [{
+                    animation: false,
+                    name: 'Delegate',
+                    type: 'line',
+                    showSymbol: true,
+                    hoverAnimation: true,
+                    data: rawData.delegates,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    smooth: true,
+                    lineStyle: {
+                        normal: {
+                            opacity: 0.5
+                        }
+                    }
+                },
+                {
+                    animation: false,
+                    name: 'Undelegate',
+                    type: 'line',
+                    showSymbol: true,
+                    hoverAnimation: true,
+                    data: rawData.undelegates,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    smooth: true,
+                    lineStyle: {
+                        normal: {
+                            opacity: 0.5
+                        }
+                    }
+                }
+            ],
+            legend: {
+                right: 10,
+                data: ['Delegate', 'Undelegate']
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross',
+                    animation: true
+                },
+            },
+            dataZoom: {
+                show: true,
+                realtime: true,
+                start: 85,
+                end: 100,
+            },
+            toolbox: {
+                top: 50,
+                right: 50,
+                orient: 'vertical',
+                feature: {
+                    dataZoom: {
+                        title: "Zoom",
+                        yAxisIndex: 'none',
+                    },
+                    saveAsImage: {
+                        title: "Save as image",
+                        pixelRatio: 2
+                    },
+                    restore: {
+                        title: "Restore"
+                    },
+                }
+            },
+        }, true);
+    });
+
+    $.get('/api/v1/status/delegation_sum.json', function (rawData) {
+
+        chartDelagationsSum.hideLoading();
+        chartDelagationsSum.setOption(option = {
+            xAxis: {
+                type: 'category',
+                data: rawData.time,
+                scale: true,
+                boundaryGap: false,
+                axisLine: {
+                    onZero: false
+                },
+                splitLine: {
+                    show: false
+                },
+                min: 'dataMin',
+                max: 'dataMax',
+                axisPointer: {
+                    z: 100
+                }
+            },
+            yAxis: {
+                type: 'value',
+                boundaryGap: [0, '25%'],
+                splitLine: {
+                    show: true
+                },
+                splitArea: {
+                    show: true
+                }
+            },
+            series: {
+                animation: false,
+                name: 'Delegate',
+                type: 'line',
+                showSymbol: true,
+                hoverAnimation: true,
+                data: rawData.delegates,
+                areaStyle: {
+                    normal: {}
+                },
+                smooth: true,
+                lineStyle: {
+                    normal: {
+                        opacity: 0.5
+                    }
+                }
+            },
+            // legend: {
+            //     right: 10,
+            //     data: ['Delegate', 'Undelegate']
+            // },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross',
+                    animation: true
+                },
+            },
+            dataZoom: {
+                show: true,
+                realtime: true,
+                start: 85,
+                end: 100,
+            },
+            toolbox: {
+                top: 50,
+                right: 50,
+                orient: 'vertical',
+                feature: {
+                    dataZoom: {
+                        title: "Zoom",
+                        yAxisIndex: 'none',
+                    },
+                    saveAsImage: {
+                        title: "Save as image",
+                        pixelRatio: 2
+                    },
+                    restore: {
+                        title: "Restore"
+                    },
+                }
+            },
+        }, true);
+    });
+
+    $.get('/api/v1/status/amount_sum.json', function (rawData) {
+
+        chartCoins.hideLoading();
+        chartCoins.setOption(option = {
+            xAxis: {
+                type: 'category',
+                data: rawData.time,
+                scale: true,
+                boundaryGap: false,
+                axisLine: {
+                    onZero: false
+                },
+                splitLine: {
+                    show: false
+                },
+                min: 'dataMin',
+                max: 'dataMax',
+                axisPointer: {
+                    z: 100
+                }
+            },
+            yAxis: {
+                type: 'value',
+                boundaryGap: [0, '25%'],
+                splitLine: {
+                    show: true
+                },
+                splitArea: {
+                    show: true
+                }
+            },
+            series: {
+                animation: false,
+                name: 'Value',
+                type: 'line',
+                showSymbol: true,
+                hoverAnimation: true,
+                data: rawData.sum,
+                sampling: 'sum',
+                areaStyle: {
+                    normal: {}
+                },
+                smooth: true,
+                lineStyle: {
+                    normal: {
+                        opacity: 0.5
+                    }
+                }
+            },
+            // legend: {
+            //     right: 10,
+            //     data: ['Delegate', 'Undelegate']
+            // },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross',
+                    animation: true
+                },
+                formatter: function (params) {
+                    params = params[0];
+                    return params.name + ' : ' + params.value.toLocaleString('en') + ' MHC';
+                },
+            },
+            dataZoom: {
+                show: true,
+                realtime: true,
+                start: 85,
+                end: 100,
+            },
+            toolbox: {
+                top: 50,
+                right: 50,
+                orient: 'vertical',
+                feature: {
+                    dataZoom: {
+                        title: "Zoom",
+                        yAxisIndex: 'none',
+                    },
+                    saveAsImage: {
+                        title: "Save as image",
+                        pixelRatio: 2
+                    },
+                    restore: {
+                        title: "Restore"
+                    },
+                }
+            },
+        }, true);
+    });
+
+    $.get('/api/v1/status/forging.json', function (rawData) {
+
+        chartForging.hideLoading();
+        chartForging.setOption(option = {
+            xAxis: {
+                type: 'category',
+                data: rawData.time,
+                scale: true,
+                boundaryGap: false,
+                axisLine: {
+                    onZero: false
+                },
+                splitLine: {
+                    show: false
+                },
+                min: 'dataMin',
+                max: 'dataMax',
+                axisPointer: {
+                    z: 100
+                }
+            },
+            yAxis: {
+                type: 'value',
+                boundaryGap: [0, '25%'],
+                splitLine: {
+                    show: true
+                },
+                splitArea: {
+                    show: true
+                }
+            },
+            series: [{
+                    animation: false,
+                    name: 'Start',
+                    type: 'line',
+                    showSymbol: true,
+                    hoverAnimation: true,
+                    data: rawData.starts,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    smooth: true,
+                    lineStyle: {
+                        normal: {
+                            opacity: 0.5
+                        }
+                    }
+                },
+                {
+                    animation: false,
+                    name: 'Stop',
+                    type: 'line',
+                    showSymbol: true,
+                    hoverAnimation: true,
+                    data: rawData.stops,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    smooth: true,
+                    lineStyle: {
+                        normal: {
+                            opacity: 0.5
+                        }
+                    }
+                }
+            ],
+            legend: {
+                right: 10,
+                data: ['Start', 'Stop']
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross',
+                    animation: true
+                },
+            },
+            dataZoom: {
+                show: true,
+                realtime: true,
+                start: 85,
+                end: 100,
+            },
+            toolbox: {
+                top: 50,
+                right: 50,
+                orient: 'vertical',
+                feature: {
+                    dataZoom: {
+                        title: "Zoom",
+                        yAxisIndex: 'none',
+                    },
+                    saveAsImage: {
+                        title: "Save as image",
+                        pixelRatio: 2
+                    },
+                    restore: {
+                        title: "Restore"
+                    },
+                }
+            },
+        }, true);
+    });
+
+    $.get('/api/v1/status/wallets.json', function (rawData) {
+
+        chartWallets.hideLoading();
+        chartWallets.setOption(option = {
+            xAxis: {
+                type: 'category',
+                data: rawData.time,
+                scale: true,
+                boundaryGap: false,
+                axisLine: {
+                    onZero: false
+                },
+                splitLine: {
+                    show: false
+                },
+                min: 'dataMin',
+                max: 'dataMax',
+                axisPointer: {
+                    z: 100
+                }
+            },
+            yAxis: {
+                type: 'value',
+                boundaryGap: [0, '25%'],
+                splitLine: {
+                    show: true
+                },
+                splitArea: {
+                    show: true
+                }
+            },
+            series: [{
+                    animation: false,
+                    name: 'Active',
+                    type: 'line',
+                    showSymbol: true,
+                    hoverAnimation: true,
+                    data: rawData.wallets_uniq,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    smooth: true,
+                    lineStyle: {
+                        normal: {
+                            opacity: 0.5
+                        }
+                    }
+                },
+                {
+                    animation: false,
+                    name: 'Totals',
+                    type: 'line',
+                    showSymbol: true,
+                    hoverAnimation: true,
+                    data: rawData.wallets_total,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    smooth: true,
+                    lineStyle: {
+                        normal: {
+                            opacity: 0.5
+                        }
+                    }
+                }
+            ],
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross',
+                    animation: true
+                },
+            },
+            dataZoom: {
+                show: true,
+                realtime: true,
+                start: 85,
+                end: 100,
+            },
+            toolbox: {
+                top: 50,
+                right: 50,
+                orient: 'vertical',
+                feature: {
+                    dataZoom: {
+                        title: "Zoom",
+                        yAxisIndex: 'none',
+                    },
+                    saveAsImage: {
+                        title: "Save as image",
+                        pixelRatio: 2
+                    },
+                    restore: {
+                        title: "Restore"
+                    },
+                }
+            },
+        }, true);
+    });
+
+    $.get('/api/v1/status/size.json', function (rawData) {
+
+        chartBlocksSize.hideLoading();
+        chartBlocksSize.setOption(option = {
+            xAxis: {
+                type: 'category',
+                data: rawData.block_hour,
+                scale: true,
+                boundaryGap: false,
+                axisLine: {
+                    onZero: false
+                },
+                splitLine: {
+                    show: false
+                },
+                min: 'dataMin',
+                max: 'dataMax',
+                axisPointer: {
+                    z: 100
+                }
+            },
+            yAxis: {
+                type: 'value',
+                boundaryGap: [0, '25%'],
+                splitLine: {
+                    show: true
+                },
+                splitArea: {
+                    show: true
+                }
+            },
+            series: {
+                animation: false,
+                name: 'Size',
+                type: 'line',
+                showSymbol: true,
+                hoverAnimation: true,
+                data: rawData.full_size,
+                areaStyle: {
+                    normal: {}
+                },
+                smooth: true,
+                lineStyle: {
+                    normal: {
+                        opacity: 0.5
+                    }
+                }
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross',
+                    animation: true
+                },
+                formatter: function (params) {
+                    params = params[0];
+                    return formatBytes(params.value);
+                },
+            },
+            dataZoom: {
+                show: true,
+                realtime: true,
+                start: 65,
+                end: 100,
+            },
+            // toolbox: {
+            //     top: 50,
+            //     right: 50,
+            //     orient: 'vertical',
+            //     feature: {
+            //         dataZoom: {
+            //             title: "Zoom",
+            //             yAxisIndex: 'none',
+            //         },
+            //         saveAsImage: {
+            //             title: "Save as image",
+            //             pixelRatio: 2
+            //         },
+            //         restore: {
+            //             title: "Restore"
+            //         },
+            //     }
+            // },
+        }, true);
+    });
+
+    setInterval(function () {
+
+        $.get('/api/v1/status/txs.json?_t=' + (new Date()).getTime(), function (rawData) {
+            chartTRX.setOption({
+                xAxis: {
+                    data: rawData.time,
+                },
+                series: {
+                    data: rawData.trx,
+                }
+            });
+        });
+    }, 5000);
+
+    function formatBytes(a, b) {
+        if (0 == a) return "0 Bytes";
+        var c = 1024,
+            d = b || 2,
+            e = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"],
+            f = Math.floor(Math.log(a) / Math.log(c));
+        return parseFloat((a / Math.pow(c, f)).toFixed(d)) + " " + e[f]
+    }
+</script>
+
+{{end}}

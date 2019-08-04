@@ -1,0 +1,157 @@
+{{define "content"}}
+{{with .Transaction -}}
+
+<section class="hero">
+    <div class="hero-body">
+        <div class="container">
+            <h1 class="title">
+                Transaction
+            </h1>
+            <h2 class="subtitle">
+                {{.Transaction}}
+            </h2>
+        </div>
+    </div>
+</section>
+
+<div class="section">
+    <div class="container">
+        <div class="card">
+            <header class="card-header">
+                <p class="card-header-title">
+                    Transaction details
+                </p>
+            </header>
+            <div class="content table-container">
+                <table class="table is-hoverable is-striped">
+                    <tbody>
+                        <tr>
+                            <td>Hash:</td>
+                            <td
+                                class="is-family-monospace has-text-{{if (eq .Status "ok") }}{{else}}danger{{end}} has-text-weight-semibold">
+                                {{.Transaction}}
+                            </td>
+                        </tr>
+                        {{ if eq .Delegate 0 }}
+                        <tr>
+                            <td>Value:</td>
+                            <td>
+                                <span class="tag is-medium {{if (gt .Value 0) }}is-success{{end}}">
+                                    {{.Value | balance}} MHC
+                                </span>
+                            </td>
+                        </tr>
+                        {{else}}
+                        <tr>
+                            <td>{{ if eq .IsDelegate true }}Delegate{{else}}UnDelegate{{end}}:</td>
+                            <td>
+                                <span class="tag is-medium is-{{if eq .IsDelegate true }}success{{else}}warning{{end}}">
+                                    {{.Delegate | balance }} MHC
+                                </span>
+                            </td>
+                        </tr>
+                        {{ if eq .IsDelegate false }}
+                        <tr>
+                            <td>DelegateHash:</td>
+                            <td class="is-family-monospace">
+                                <a href="/txs/{{.DelegateHash}}">{{.DelegateHash}}</a>
+                            </td>
+                        </tr>
+                        {{end}}
+                        {{end}}
+                        <tr>
+                            <td>Status:</td>
+                            <td>
+                                <div class="tags has-addons">
+                                    <span class="tag is">{{.IntStatus}}</span>
+                                    <span
+                                        class="tag is-{{if (eq .Status "ok") }}success{{else}}danger{{end}}">{{.Status}}</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Timestamp:</td>
+                            <td>{{.TimeStamp | timeago_max}}</td>
+                        </tr>
+                        <tr>
+                            <td>From:</td>
+                            <td class="is-family-monospace"><a href="/address/{{.From}}">{{.From | addressname_big}}</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>To:</td>
+                            <td class="is-family-monospace">
+                                {{if (eq .From .To) }}⥂{{else}}⟶{{end}}
+                                <a href="/address/{{.To}}">{{.To | addressname_big}}</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Type:</td>
+                            <td>{{.Type}}</td>
+                        </tr>
+                        <tr>
+                            <td>Block:</td>
+                            <td><a href="/blocks/{{.BlockNumber}}">{{.BlockNumber}}</a></td>
+                        </tr>
+                        <tr>
+                            <td>Fee:</td>
+                            <td>
+                                <div class="tags has-addons">
+                                    <span class="tag">{{.Fee}} </span>
+                                    <span class="tag is-dark">real {{.RealFee}}</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Nonce:</td>
+                            <td>{{.Nonce}}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <div class="field">
+                                    <label>Decoded data:</label>
+                                    <div class="control">
+                                        <textarea class="textarea" disabled>{{.DataString}}</textarea>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <div class="field">
+                                    <label>Raw data:</label>
+                                    <div class="control">
+                                        <textarea class="textarea" disabled>{{.Data}}</textarea>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <div class="field">
+                                    <label>Signature:</label>
+                                    <div class="control">
+                                        <textarea class="textarea" rows="2" disabled>{{.Signature}}</textarea>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <div class="field">
+                                    <label>Public key:</label>
+                                    <div class="control">
+                                        <textarea class="textarea" rows="2" disabled>{{.PublicKey}}</textarea>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{{- end}}
+{{end}}

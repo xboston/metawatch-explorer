@@ -1,0 +1,641 @@
+{{define "content"}}
+
+{{$maxRPS:=.maxRPS}}
+{{$minRPS:=.minRPS}}
+{{$avgRPS:=.avgRPS}}
+{{$maxQPS:=.maxQPS}}
+{{$minQPS:=.minQPS}}
+{{$avgQPS:=.avgQPS}}
+{{$benchCount:=.benchCount}}
+{{$nodeData:=.nodeData}}
+
+{{ template "addressheader" . }}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.min.css" />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/4.1.0/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/noty/3.1.4/noty.min.js"></script>
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+    integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+
+<div class="section">
+    <div class="container">
+        <div class="card">
+            <div class="tabs">
+                <ul>
+                    <li><a href="/address/{{.address}}">Adress Details</a></li>
+                    <li><a href="/address/{{.address}}/txs">Transactions</a></li>
+                    <li><a href="/address/{{.address}}/delegations">Delegations</a></li>
+                    <li><a href="/address/{{.address}}/forging">Forging</a></li>
+                    {{ if .serverNode }}
+                    <li class="is-active"><a href="/address/{{.address}}/info">Server information</a></li>
+                    <li><a href="/address/{{.address}}/rewards">Server rewards</a></li>
+                    <li><a href="/address/{{.address}}/server-delegations">Server delegations</a></li>
+                    {{end}}
+                </ul>
+            </div>
+            {{with .resultBalance -}}
+            <div class="content table-container">
+                <table class="table is-hoverable is-fullwidth is-striped">
+                    <tbody>
+                        <tr>
+                            <td>Delegated:</td>
+                            <td>
+                                <div class="tags has-addons are-medium">
+                                    <span
+                                        class="tooltip is-tooltip-right tag is-{{if (gt .DelegatedAmount 0) }}success{{else}}warning{{end}}"
+                                        title="{{.DelegatedAmount}}"
+                                        data-tooltip="= in {{.Delegated | balance}} - {{.Undelegated | balance}} out">
+                                        {{.DelegatedAmount | balance}} MHC
+                                    </span>
+                                    <span
+                                        class="tag {{ if and (lt .ToHardCap 1000000000000) (gt .ToHardCap 0) }}is-warning{{else if(lt .ToHardCap 0)}}is-danger{{else}}is-success{{end}}">
+                                        to peer-node hardcap {{ .ToHardCap | balance }}
+                                    </span>
+
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Node:</td>
+                                <td>
+                                    <div class="tags has-addons are-medium">
+                                        <span class="tag is-dark">
+                                            {{$nodeData.NodeType}}
+                                        </span>
+                                        <div class="tag is-uppercase">
+                                            ROI: {{$nodeData.ROI}}
+                                            GEO: {{$nodeData.Geo}}
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        <tr>
+                            <td>MetaGate URL:</td>
+                            <td class="btn-copy-mg-url" data-clipboard-target="#mg-url">
+                                <span class="tag">
+                                    <span class="icon">
+                                        <i class="fas fa-copy"></i>
+                                    </span>
+                                    <a class="are-medium "
+                                        id="mg-url">app://ForgingMHC#!/delegation/server/{{.Address}}</a>
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Today RPS:</td>
+                            <td>
+                                <div class="tags has-addons">
+                                    <span class="tag">
+                                        max = {{$maxRPS}},
+                                        min = {{$minRPS}},
+                                        avg = {{$avgRPS}},
+                                    </span>
+                                    <div class="tag">
+                                        bench count = {{$benchCount}}
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Today QPS:</td>
+                            <td>
+                                <div class="tags has-addons">
+                                    <span class="tag">
+                                        max = {{$maxQPS}},
+                                        min = {{$minQPS}},
+                                        avg = {{$avgQPS}},
+                                    </span>
+                                    <div class="tag">
+                                        bench count = {{$benchCount}}
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>metawat.ch status:</td>
+                            <td>
+                                <div class="tags has-addons">
+                                    <span class="tag">
+                                        node
+                                    </span>
+                                    <div 
+                                    class="tooltip is-tooltip-right tag is-{{if $nodeData.IsOnline }}success{{else}}danger{{end}}"
+                                    data-tooltip="{{ $nodeData.LastChecked | timeago_time }}">
+                                        {{if $nodeData.IsOnline }}online{{else}}offline{{end}}
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                {{- end}}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="container">
+        <div class="card" name="benchmark" id="benchmark">
+            <header class="card-header">
+                <a class="card-header-title" href="#benchmark">
+                    Node benchmark
+                </a>
+            </header>
+            <div class="card-content">
+                <div class="columns">
+                    <div class="column is-full">
+                        <div id="chart_rps" style="width: 100%; min-height: 400px"></div>
+                    </div>
+                </div>
+                <div class="columns">
+                    <div class="column is-full">
+                        <div id="chart_qps" style="width: 100%; min-height: 400px"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="container">
+        <div class="columns">
+            <div class="column">
+                <div class="card" name="rewards" id="rewards">
+                    <header class="card-header">
+                        <a class="card-header-title" href="/address/{{.address}}/rewards">
+                            Server rewards
+                        </a>
+                    </header>
+                    <div class="card-content">
+                        <div id="chart_noderewards" style="width: 100%; min-height: 300px"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="column">
+                <div class="card" name="delegate" id="delegate">
+                    <header class="card-header">
+                        <a class="card-header-title" href="/address/{{.address}}//server-delegations">
+                            Delegate operations
+                        </a>
+                    </header>
+                    <div class="card-content">
+                        <div id="chart_delagations" style="width: 100%; min-height: 300px"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script type="text/javascript">
+    let clipboard = new ClipboardJS('.btn-copy-mg-url');
+    clipboard.on('success', function (e) {
+        new Noty({
+            theme: 'relax',
+            type: 'success',
+            text: 'URL copied to clipboard',
+            timeout: 3000,
+        }).show();
+        e.clearSelection();
+    });
+
+    const chartRPS = echarts.init($('#chart_rps')[0]);
+    const chartQPS = echarts.init($('#chart_qps')[0]);
+    const chartDelagations = echarts.init($('#chart_delagations')[0]);
+    const chartNodeRewards = echarts.init($('#chart_noderewards')[0]);
+
+
+    chartRPS.showLoading();
+    chartQPS.showLoading();
+    chartDelagations.showLoading();
+    chartNodeRewards.showLoading();
+
+    function splitData(rawData) {
+        var categoryData = [];
+        var values = [];
+        var names = [];
+        for (var i = 0; i < rawData.length; i++) {
+
+            if (typeof values[rawData[i][1]] === 'undefined') {
+                values[rawData[i][1]] = [];
+            }
+
+            categoryData[rawData[i][0]] = 1;
+            names[rawData[i][1]] = 1;
+            values[rawData[i][1]].push([rawData[i][0], rawData[i][2]]);
+        }
+
+        return {
+            categoryData: Object.keys(categoryData),
+            names: Object.keys(names),
+            values,
+        };
+    }
+
+    $.get('/api/v1/nodes/{{.address}}/proxy-load.json', function (rawData) {
+
+        chartRPS.hideLoading();
+
+        let dataRPS = splitData(rawData.rps);
+        let dataQPS = splitData(rawData.qps);
+
+        let datastoreRPS = [];
+        let datastoreQPS = [];
+
+        const startPoint = dataRPS.values[dataRPS.names[0]].length > 256 ? 90 : 0;
+
+        for (var property in dataRPS.values) {
+            if (dataRPS.values.hasOwnProperty(property)) {
+                const ii = {
+                    animation: false,
+                    name: property,
+                    type: 'line',
+                    areaStyle: {
+                        normal: {}
+                    },
+                    data: dataRPS.values[property],
+                    smooth: true,
+                    lineStyle: {
+                        normal: {
+                            opacity: 0.5
+                        }
+                    }
+                };
+
+                datastoreRPS.push(ii);
+            }
+        }
+
+        for (var property in dataQPS.values) {
+            if (dataQPS.values.hasOwnProperty(property)) {
+                const ii = {
+                    animation: false,
+                    name: property,
+                    type: 'line',
+                    areaStyle: {
+                        normal: {}
+                    },
+                    data: dataQPS.values[property],
+                    smooth: true,
+                    lineStyle: {
+                        normal: {
+                            opacity: 0.5
+                        }
+                    }
+                };
+
+                datastoreQPS.push(ii);
+            }
+        }
+
+        chartRPS.setOption(option = {
+            xAxis: [{
+                type: 'category',
+                data: dataRPS.categoryData,
+                scale: true,
+                boundaryGap: false,
+                axisLine: {
+                    onZero: false
+                },
+                splitLine: {
+                    show: false
+                },
+                splitNumber: 20,
+                min: 'dataMin',
+                max: 'dataMax',
+                axisPointer: {
+                    z: 100
+                }
+            }],
+            yAxis: [{
+                scale: true,
+                splitArea: {
+                    show: true
+                }
+            }, ],
+            series: datastoreRPS,
+            title: {
+                text: 'RPS',
+                x: 'left'
+            },
+            legend: {
+                data: dataRPS.names,
+                x: 'right'
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross',
+                    animation: true
+                }
+            },
+            dataZoom: [{
+                    show: true,
+                    realtime: true,
+                    start: startPoint,
+                    end: 100,
+                    // xAxisIndex: [0, 1]
+                },
+                {
+                    type: 'inside',
+                    realtime: true,
+                    start: startPoint,
+                    end: 100,
+                    // xAxisIndex: [0, 1]
+                }
+            ],
+            toolbox: {
+                top: 50,
+                // right: 50,
+                orient: 'vertical',
+                // showTitle: false,
+                feature: {
+                    dataZoom: {
+                        title: "Zoom",
+                        yAxisIndex: 'none',
+                    },
+                    saveAsImage: {
+                        title: "Save as image",
+                        pixelRatio: 2
+                    },
+                    restore: {
+                        title: "Restore"
+                    },
+                }
+            },
+        }, true);
+
+
+        chartQPS.hideLoading();
+        chartQPS.setOption(option = {
+            xAxis: [{
+                type: 'category',
+                data: dataQPS.categoryData,
+                scale: true,
+                boundaryGap: false,
+                axisLine: {
+                    onZero: false
+                },
+                splitLine: {
+                    show: false
+                },
+                splitNumber: 20,
+                min: 'dataMin',
+                max: 'dataMax',
+                axisPointer: {
+                    z: 100
+                }
+            }],
+            yAxis: [{
+                scale: true,
+                splitArea: {
+                    show: true
+                }
+            }, ],
+            series: datastoreQPS,
+            title: {
+                text: 'QPS',
+                x: 'left'
+            },
+            legend: {
+                data: dataQPS.names,
+                x: 'right'
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross',
+                    animation: true
+                }
+            },
+            dataZoom: [{
+                    show: true,
+                    realtime: true,
+                    start: startPoint,
+                    end: 100,
+                    // xAxisIndex: [0, 1]
+                },
+                {
+                    type: 'inside',
+                    realtime: true,
+                    start: startPoint,
+                    end: 100,
+                    // xAxisIndex: [0, 1]
+                }
+            ],
+            toolbox: {
+                top: 50,
+                // right: 50,
+                orient: 'vertical',
+                // showTitle: false,
+                feature: {
+                    dataZoom: {
+                        title: "Zoom",
+                        yAxisIndex: 'none',
+                    },
+                    saveAsImage: {
+                        title: "Save as image",
+                        pixelRatio: 2
+                    },
+                    restore: {
+                        title: "Restore"
+                    },
+                }
+            },
+        }, true);
+    });
+
+    $.get('/api/v1/nodes/{{.address}}/delegations.json', function (rawData) {
+
+        chartDelagations.hideLoading();
+        chartDelagations.setOption(option = {
+            xAxis: {
+                type: 'category',
+                data: rawData.time,
+                scale: true,
+                boundaryGap: false,
+                axisLine: {
+                    onZero: false
+                },
+                splitLine: {
+                    show: false
+                },
+                min: 'dataMin',
+                max: 'dataMax',
+                axisPointer: {
+                    z: 100
+                }
+            },
+            yAxis: {
+                type: 'value',
+                boundaryGap: [0, '25%'],
+                splitLine: {
+                    show: true
+                },
+                splitArea: {
+                    show: true
+                }
+            },
+            series: [{
+                    animation: false,
+                    name: 'Delegate',
+                    type: 'line',
+                    showSymbol: true,
+                    hoverAnimation: true,
+                    data: rawData.delegates,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    smooth: true,
+                    lineStyle: {
+                        normal: {
+                            opacity: 0.5
+                        }
+                    }
+                },
+                {
+                    animation: false,
+                    name: 'Undelegate',
+                    type: 'line',
+                    showSymbol: true,
+                    hoverAnimation: true,
+                    data: rawData.undelegates,
+                    areaStyle: {
+                        normal: {}
+                    },
+                    smooth: true,
+                    lineStyle: {
+                        normal: {
+                            opacity: 0.5
+                        }
+                    }
+                }
+            ],
+            // legend: {
+            //     right: 10,
+            //     data: ['Delegate', 'Undelegate']
+            // },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross',
+                    animation: true
+                },
+            },
+            dataZoom: {
+                show: true,
+                realtime: true,
+                start: 85,
+                end: 100,
+            },
+            toolbox: {
+                // top: 50,
+                // right: 50,
+                orient: 'vertical',
+                feature: {
+                    dataZoom: {
+                        title: "Zoom",
+                        yAxisIndex: 'none',
+                    },
+                    saveAsImage: {
+                        title: "Save as image",
+                        pixelRatio: 2
+                    },
+                    restore: {
+                        title: "Restore"
+                    },
+                }
+            },
+        }, true);
+    });
+
+    $.get('/api/v1/nodes/{{.address}}/rewards.json', function (rawData) {
+
+        chartNodeRewards.hideLoading();
+        chartNodeRewards.setOption(option = {
+            xAxis: {
+                type: 'category',
+                data: rawData.time,
+                scale: true,
+                boundaryGap: false,
+                axisLine: {
+                    onZero: false
+                },
+                splitLine: {
+                    show: false
+                },
+                min: 'dataMin',
+                max: 'dataMax',
+                axisPointer: {
+                    z: 100
+                }
+            },
+            yAxis: {
+                type: 'value',
+                // boundaryGap: [0, '50%'],
+                splitLine: {
+                    show: true
+                },
+                splitArea: {
+                    show: true
+                }
+            },
+            series: {
+                animation: false,
+                name: 'Reward',
+                type: 'line',
+                showSymbol: true,
+                hoverAnimation: true,
+                data: rawData.rewards,
+                areaStyle: {
+                    normal: {}
+                },
+                smooth: true,
+                lineStyle: {
+                    normal: {
+                        opacity: 0.5
+                    }
+                }
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross',
+                    animation: true
+                },
+            },
+            dataZoom: {
+                show: true,
+                realtime: true,
+                start: 0,
+                end: 100,
+            },
+            toolbox: {
+                // top: 50,
+                // right: 50,
+                orient: 'vertical',
+                feature: {
+                    dataZoom: {
+                        title: "Zoom",
+                        yAxisIndex: 'none',
+                    },
+                    saveAsImage: {
+                        title: "Save as image",
+                        pixelRatio: 2
+                    },
+                    restore: {
+                        title: "Restore"
+                    },
+                }
+            },
+        }, true);
+    });
+</script>
+
+{{end}}

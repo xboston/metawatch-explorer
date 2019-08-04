@@ -1,0 +1,56 @@
+nav.custom-panel div.panel-block {
+    padding: 0;
+}
+
+div.custom-columns div.column {
+    padding: 0;
+}
+
+div.custom-columns div.column div.is-divider {
+    margin: 1rem 0;
+}
+
+div.section {
+    padding: 1.5rem 1.5rem;
+}
+
+div#space-delimiter{
+    margin-bottom: 2.5em;
+    display: block;
+    /* height: 2.5em; */
+}
+
+.block-with-text {
+    width: 40%;
+    white-space: nowrap;
+    overflow: hidden;
+    display: inline-block;
+    text-overflow: ellipsis;
+}
+
+#logo {
+    margin: 0.5em;
+}
+
+.navbar-spaced{
+    padding: 0.2rem 0.1rem;
+}
+
+#proxytable{
+    min-height: 3em;
+}
+
+div.tabs{
+    padding-top: .75rem;
+    padding-bottom: .75rem;
+}
+
+.docs-menu-wrapper {
+    position: fixed;
+    top: 52px;
+    padding-top: 48px;
+    padding-bottom: 48px;
+    padding-right: 30px;
+    bottom: 0;
+    width: 320px;
+}

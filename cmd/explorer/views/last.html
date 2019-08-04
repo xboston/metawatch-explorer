@@ -1,0 +1,97 @@
+<!doctype html>
+<html class="no-js" lang="ru">
+
+<head>
+  <meta charset="utf-8">
+  <title>{{ .title }}</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="apple-touch-icon" href="icon.png">
+  <!-- Place favicon.ico in the root directory -->
+  <meta name="theme-color" content="#fafafa">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.min.css">
+  <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+
+
+</head>
+
+<body>
+
+  <section class="section">
+    <div class="container">
+      <nav class="level">
+        <p class="level-item has-text-centered">
+          <a class="link is-info">Home</a>
+        </p>
+        <p class="level-item has-text-centered">
+          <a class="link is-info">Menu</a>
+        </p>
+        <p class="level-item has-text-centered">
+          <a class="link is-info is-uppercase title" href="/">metawat.ch</a>
+        </p>
+        <p class="level-item has-text-centered">
+          <a class="link is-info">Reservations</a>
+        </p>
+        <p class="level-item has-text-centered">
+          <a class="link is-info">Contact</a>
+        </p>
+      </nav>
+      <nav class="level">
+        <div class="level-item has-text-centered">
+          <div>
+            <p class="heading">Tweets</p>
+            <p class="title">3,456</p>
+          </div>
+        </div>
+        <div class="level-item has-text-centered">
+          <div>
+            <p class="heading">Following</p>
+            <p class="title">123</p>
+          </div>
+        </div>
+        <div class="level-item has-text-centered">
+          <div>
+            <p class="heading">Followers</p>
+            <p class="title">456K</p>
+          </div>
+        </div>
+        <div class="level-item has-text-centered">
+          <div>
+            <p class="heading">Likes</p>
+            <p class="title">789</p>
+          </div>
+        </div>
+      </nav>
+      <ul>
+        {{range .resultLastTxs}}
+        <li>
+          tx: <a href="/txs/{{.Transaction}}">{{.Transaction}}</a>,
+          block: <a href="/blocks/{{.BlockNumber}}">{{.BlockNumber}}</a>
+          <br />
+          time: {{.Timestamp}}
+          value: {{.Value}}
+          from <a href="/address/{{.From}}">{{.From}}</a>
+          to <a href="/address/{{.To}}">{{.To}}</a>,
+          <br />
+
+        </li>
+        {{end}}
+      </ul>
+      <div class="columns">
+        <div class="column">1</div>
+        <div class="column">2</div>
+        <div class="column">3</div>
+        <div class="column">4</div>
+        <div class="column">5</div>
+      </div>
+    </div>
+  </section>
+
+
+
+</body>
+
+</html>

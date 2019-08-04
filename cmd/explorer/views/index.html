@@ -1,0 +1,109 @@
+{{define "content"}}
+
+<section class="section">
+  <div class="container">
+    <div class="card">
+      <nav class="level card-content">
+        <div class="level-item has-text-centered">
+          <div>
+            <p class="title">${{ .statusData.currentPriceUSD }}</p>
+            <p class="heading has-text-grey-light is-lowercase">24h price <span
+                class="has-text-{{if (gt .statusData.currentPriceUSDDIFF 0.0) }}success{{else}}danger{{end}}">{{ .statusData.currentPriceUSDDIFF }}%</span>
+            </p>
+          </div>
+        </div>
+        <div class="level-item has-text-centered">
+          <a href="/blocks">
+            <p class="title">{{ .statusData.maxBlockNumber | bignumber }}</p>
+            <p class="heading has-text-grey-light is-lowercase">blocks height</p>
+          </a>
+        </div>
+        <div class="level-item has-text-centered">
+          <a href="/txs">
+            <p class="title">{{ .statusData.trxCount | bignumber }}</p>
+            <p class="heading has-text-grey-light is-lowercase">transactions</p>
+          </a>
+        </div>
+        <div class="level-item has-text-centered">
+          <a href="/map">
+            <p class="title">{{ .statusData.nodesCount | bignumber }}</p>
+            <p class="heading has-text-grey-light is-lowercase">nodes online</p>
+          </a>
+        </div>
+        <div class="level-item has-text-centered">
+          <a href="/address">
+            <p class="title">{{ .statusData.walletsCount | bignumber}}</p>
+            <p class="heading has-text-grey-light is-lowercase">known accounts</p>
+          </a>
+        </div>
+        <div class="level-item has-text-centered">
+          <a href="/address">
+            <p class="title">~{{ .statusData.delegatedAmount | bignumber}}</p>
+            <p class="heading has-text-grey-light is-lowercase">frozen in delegations</p>
+          </a>
+        </div>
+      </nav>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <form action="/search" method="GET">
+    <div class="container">
+      <div class="field has-addons ">
+        <div class="control is-expanded">
+          <input id="search_q" class="input" type="text" placeholder="Address / Txhash / Block" name="q" value="{{.q}}"
+            autocomplete="off" required>
+          </span>
+        </div>
+        <div class="control">
+          <button class="button is-info" type="submit">
+            Search
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+</section>
+
+<div class="section">
+  <div class="container">
+    <div class="card">
+      <header class="card-header">
+        <p class="card-header-title">
+          TraceChain top nodes
+        </p>
+      </header>
+      <div class="table-is-responsive">
+        <table id="proxytable" class="sortable table is-striped is-hoverable is-striped" width="100%">
+          <thead>
+            <tr>
+              <th>Roi</th>
+              <th>Trust</th>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Geo</th>
+              <th>Capital</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{range .nodes}}
+            <tr>
+              <td>{{.ROI}}</td>
+              <td>{{.Trust}}</td>
+              <td><a href="/address/{{.Address}}/info">{{.Name}}</a></td>
+              <td>{{.Type}}</td>
+              <td>{{.Geo}}</td>
+              <td data-value="{{.Delegated}}"><span
+                  class="tag {{ if and (lt .ToHardCap 1000000000000) (gt .ToHardCap 0) }}is-warning{{else if(lt .ToHardCap 0)}}is-danger{{else}}is-success{{end}}">{{.Delegated | balance}}</span>
+              </td>
+            </tr>
+            {{end}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>  
+<script src="/vendors/sorttable.js"></script>
+{{end}}
