@@ -41,6 +41,7 @@ var (
 		"0x004e10e987a4f9ba73c40780679dd8688bc306b68052c31766": "DetaxPay",
 		"0x00a8a58f6cdce810bafc58be25783a0ba6c917dd82d302d404": "Bit-Z|BitZ",
 		"0x005b891007c2000fee08e085beb91494f1d3753eb8eee354f0": "CEX.IO",
+		"0x001c65639339ad5ec96d02938f802858425a502ec04206515b": "BitMax.io",
 		// разные
 		"0x00b1dad3a1e82b4c639b3ee380ddba34753a6c9a0cd830dd87": "Coins for cartoons",
 		"0x00d3faa7e8443c1ee8c4c4ab203aff2e1ff83109ad211e42bc": "Meta.Tools",

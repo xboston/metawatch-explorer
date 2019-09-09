@@ -1,7 +1,8 @@
-package main
+package metawatch
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"strconv"
 	"strings"
 	"time"
@@ -118,8 +119,7 @@ func (b *Balance) DelegatedAmount() int64 {
 		return 0
 	}
 
-	// 1e6 - первоначальный капитал регистрации ноды
-	return b.Delegated - b.Undelegated + 1e6
+	return b.Delegated - b.Undelegated
 }
 
 func (b *Balance) ToHardCap() int64 {

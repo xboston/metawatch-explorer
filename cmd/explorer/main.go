@@ -28,6 +28,7 @@ import (
 	"github.com/nsqio/go-nsq"
 	"github.com/vmihailenco/msgpack"
 	"github.com/xboston/metahash-go"
+	"github.com/xboston/metawatch-explorer/share/metawatch"
 	"golang.org/x/text/message"
 )
 
@@ -263,9 +264,9 @@ func main() {
 			err = connectMysql.Select(&nodes, `SELECT nodes.address, node_type, name, mg_trust, mg_geo, mg_roi, addresses.delegated_amount AS delegated_amount
 				FROM nodes
 				INNER JOIN addresses ON (nodes.address=addresses.address AND addresses.delegated_amount>= 100000*1e6 AND addresses.delegated_amount <= 10000000*1e6)
-				WHERE mg_status=1 AND mg_trust<>'0.001' AND mg_roi<>'0.000000'
+				WHERE mg_status=1 AND mg_trust<>'0.001' 
 				ORDER BY ROUND(delegated_amount/1e11,0) ASC, mg_trust DESC, mg_roi DESC
-				LIMIT 500`)
+				LIMIT 500`) // AND mg_roi<>'0.000000'
 			if err != nil {
 				log.Fatal(err.Error())
 			}
@@ -297,12 +298,12 @@ func main() {
 		// все транзакции с постраничкой
 		groupTxs.GET("", func(c echo.Context) error {
 
-			responseLastTxs, err := rpcClientTorrent.Call("get-last-txs", &LastTxsArgs{})
+			responseLastTxs, err := rpcClientTorrent.Call("get-last-txs", &metawatch.LastTxsArgs{})
 			if err != nil {
 				return c.JSON(http.StatusBadRequest, err.Error())
 			}
 
-			var resultLastTxs []*TransactionInfo
+			var resultLastTxs []*metawatch.TransactionInfo
 			err = responseLastTxs.GetObject(&resultLastTxs)
 
 			if err != nil {
@@ -413,7 +414,7 @@ func main() {
 		// транзакция по хешу
 		groupTxs.GET("/:hash", func(c echo.Context) error {
 			hash := c.Param("hash")
-			responseTransaction, err := rpcClientTorrent.Call("get-tx", &TransactionArgs{Hash: hash})
+			responseTransaction, err := rpcClientTorrent.Call("get-tx", &metawatch.TransactionArgs{Hash: hash})
 
 			if responseTransaction.Error != nil {
 				return c.Render(http.StatusOK, "404message", echo.Map{
@@ -426,7 +427,7 @@ func main() {
 				return c.JSON(http.StatusBadRequest, err.Error())
 			}
 
-			var resultTransaction *Transaction
+			var resultTransaction *metawatch.Transaction
 			err = responseTransaction.GetObject(&resultTransaction)
 
 			if err != nil {
@@ -516,12 +517,12 @@ func main() {
 				})
 			}
 
-			responseBalance, err := rpcClientTorrent.Call("fetch-balance", &BalanceArgs{Address: address})
+			responseBalance, err := rpcClientTorrent.Call("fetch-balance", &metawatch.BalanceArgs{Address: address})
 			if err != nil {
 				return c.JSON(http.StatusBadRequest, err.Error())
 			}
 
-			var resultBalance *Balance
+			var resultBalance *metawatch.Balance
 			err = responseBalance.GetObject(&resultBalance)
 			if err != nil {
 				return c.JSON(http.StatusBadRequest, err.Error())
@@ -570,19 +571,19 @@ func main() {
 			page := c.QueryParam("page")
 			pageInt, _ := strconv.Atoi(page)
 
-			responseBalance, err := rpcClientTorrent.Call("fetch-balance", &BalanceArgs{Address: address})
+			responseBalance, err := rpcClientTorrent.Call("fetch-balance", &metawatch.BalanceArgs{Address: address})
 			if err != nil {
 				return c.JSON(http.StatusBadRequest, err.Error())
 			}
 
-			var resultBalance *Balance
+			var resultBalance *metawatch.Balance
 			err = responseBalance.GetObject(&resultBalance)
 			if err != nil {
 				return c.JSON(http.StatusBadRequest, err.Error())
 			}
 
 			var (
-				resultHistory []*TransactionInfo
+				resultHistory []*metawatch.TransactionInfo
 				pagination    *Pagination
 			)
 
@@ -592,7 +593,7 @@ func main() {
 				pagination = NewPagination(transactionsCount, int64(pageInt), txLimit, "/address/"+address+"/txs?page=")
 				pagination.Init()
 
-				args := &HistoryArgs{
+				args := &metawatch.HistoryArgs{
 					Address:  address,
 					CountTxs: pagination.limit,
 					BeginTx:  pagination.start - 1,
@@ -642,11 +643,11 @@ func main() {
 				return c.JSON(http.StatusBadRequest, err.Error())
 			}
 
-			var resultHistory []*TransactionInfo
+			var resultHistory []*metawatch.TransactionInfo
 			var delegate, blockNumber, timestamp int64
 			var transaction, toA, abstractMethod string
 			for rows.Next() {
-				tx := &TransactionInfo{}
+				tx := &metawatch.TransactionInfo{}
 				err := rows.Scan(&timestamp, &transaction, &toA, &delegate, &abstractMethod, &blockNumber)
 
 				if err != nil {
@@ -697,13 +698,13 @@ func main() {
 			}
 
 			var (
-				resultHistory                            []*TransactionInfo
+				resultHistory                            []*metawatch.TransactionInfo
 				value, intStatus, blockNumber, timestamp int64
 				transaction, toA, abstractMethod         string
 			)
 
 			for rows.Next() {
-				tx := &TransactionInfo{}
+				tx := &metawatch.TransactionInfo{}
 				err := rows.Scan(&timestamp, &transaction, &toA, &value, &abstractMethod, &intStatus, &blockNumber)
 				if err != nil {
 					return c.JSON(http.StatusBadRequest, err.Error())
@@ -757,9 +758,9 @@ func main() {
 				}
 			}
 
-			responseBalance, err := rpcClientTorrent.Call("fetch-balance", &BalanceArgs{Address: address})
+			responseBalance, err := rpcClientTorrent.Call("fetch-balance", &metawatch.BalanceArgs{Address: address})
 
-			var resultBalance *Balance
+			var resultBalance *metawatch.Balance
 			err = responseBalance.GetObject(&resultBalance)
 			if err == nil {
 
@@ -806,7 +807,7 @@ func main() {
 			}
 			defer rowsTRX.Close()
 
-			var resultHistory []*TransactionInfo
+			var resultHistory []*metawatch.TransactionInfo
 			for rowsTRX.Next() {
 				var (
 					transaction, toA, fromA, dataString, status string
@@ -815,7 +816,7 @@ func main() {
 				if err := rowsTRX.Scan(&timestamp, &transaction, &value, &toA, &fromA, &status, &intStatus, &blockNumber, &dataString); err != nil {
 					log.Fatal(err)
 				}
-				trxInfo := &TransactionInfo{
+				trxInfo := &metawatch.TransactionInfo{
 					TimeStamp:   timestamp,
 					Transaction: transaction,
 					Value:       value,
@@ -861,11 +862,11 @@ func main() {
 			}
 			defer rows.Close()
 
-			var resultHistory []*TransactionInfo
+			var resultHistory []*metawatch.TransactionInfo
 			var delegate, blockNumber, timestamp int64
 			var transaction, fromA, abstractMethod string
 			for rows.Next() {
-				tx := &TransactionInfo{}
+				tx := &metawatch.TransactionInfo{}
 				if err := rows.Scan(&timestamp, &transaction, &fromA, &delegate, &abstractMethod, &blockNumber); err != nil {
 					log.Fatal(err)
 				}
@@ -915,7 +916,7 @@ func main() {
 
 		// транзакция или блок
 		if qLen == 64 {
-			responseBlockByHash, err := rpcClientTorrent.Call("get-block-by-hash", &BlockByHashArgs{Hash: q, Type: 0})
+			responseBlockByHash, err := rpcClientTorrent.Call("get-block-by-hash", &metawatch.BlockByHashArgs{Hash: q, Type: 0})
 			if err == nil && responseBlockByHash.Error == nil {
 				return c.Redirect(http.StatusMovedPermanently, "/blocks/"+q)
 			}
@@ -936,12 +937,12 @@ func main() {
 
 		if valuesRaw == nil {
 
-			responseBalance, err := rpcClientTorrent.Call("fetch-balance", &BalanceArgs{Address: addressNodeRegistrator})
+			responseBalance, err := rpcClientTorrent.Call("fetch-balance", &metawatch.BalanceArgs{Address: addressNodeRegistrator})
 			if err != nil {
 				return c.JSON(http.StatusBadRequest, err.Error())
 			}
 
-			var resultBalance *Balance
+			var resultBalance *metawatch.Balance
 			err = responseBalance.GetObject(&resultBalance)
 			if err != nil {
 				return c.JSON(http.StatusBadRequest, err.Error())
@@ -950,7 +951,7 @@ func main() {
 			pagination := NewPagination(resultBalance.CountTxs, int64(pageInt), txLimit, "/nodes?page=")
 			pagination.Init()
 
-			args := &HistoryArgs{
+			args := &metawatch.HistoryArgs{
 				Address:  addressNodeRegistrator,
 				CountTxs: pagination.limit,
 				BeginTx:  pagination.start - 1,
@@ -961,7 +962,7 @@ func main() {
 				return c.JSON(http.StatusBadRequest, err.Error())
 			}
 
-			var resultHistory []*TransactionInfo
+			var resultHistory []*metawatch.TransactionInfo
 			err = responseHistory.GetObject(&resultHistory)
 			if err != nil {
 				return c.JSON(http.StatusBadRequest, err.Error())
@@ -993,13 +994,13 @@ func main() {
 		page := c.QueryParam("page")
 		pageInt, _ := strconv.Atoi(page)
 
-		responseCountBlocks, err := rpcClientTorrent.Call("get-count-blocks", &CountBlocksArgs{})
+		responseCountBlocks, err := rpcClientTorrent.Call("get-count-blocks", &metawatch.CountBlocksArgs{})
 
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err.Error())
 		}
 
-		var resultCountBlocks *CountBlocks
+		var resultCountBlocks *metawatch.CountBlocks
 		err = responseCountBlocks.GetObject(&resultCountBlocks)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, err.Error())
@@ -1008,7 +1009,7 @@ func main() {
 		pagination := NewPagination(resultCountBlocks.CountBlocks, int64(pageInt), pageLimit, "/blocks?page=")
 		pagination.Init()
 
-		args := &BlocksArgs{
+		args := &metawatch.BlocksArgs{
 			CountBlocks: pagination.limit,
 			BeginBlock:  pagination.start,
 		}
@@ -1018,7 +1019,7 @@ func main() {
 			return c.JSON(http.StatusBadRequest, err.Error())
 		}
 
-		var resultBlocks []*Block
+		var resultBlocks []*metawatch.Block
 		err = responseBlocks.GetObject(&resultBlocks)
 
 		return c.Render(http.StatusOK, "blocks", echo.Map{
@@ -1035,13 +1036,13 @@ func main() {
 
 		if len(hash) < 64 {
 			blockNumber, _ := strconv.Atoi(hash)
-			responseBlockByNumber, err := rpcClientTorrent.Call("get-block-by-number", &BlockByNumberArgs{Number: int64(blockNumber), Type: 2})
+			responseBlockByNumber, err := rpcClientTorrent.Call("get-block-by-number", &metawatch.BlockByNumberArgs{Number: int64(blockNumber), Type: 2})
 
 			if err != nil {
 				return c.JSON(http.StatusBadRequest, err.Error())
 			}
 
-			var resultBlockByNumber *Block
+			var resultBlockByNumber *metawatch.Block
 			err = responseBlockByNumber.GetObject(&resultBlockByNumber)
 
 			if err != nil {
@@ -1060,9 +1061,9 @@ func main() {
 				"block": &resultBlockByNumber,
 			})
 		}
-		responseBlockByHash, err := rpcClientTorrent.Call("get-block-by-hash", &BlockByHashArgs{Hash: hash, Type: 2})
+		responseBlockByHash, err := rpcClientTorrent.Call("get-block-by-hash", &metawatch.BlockByHashArgs{Hash: hash, Type: 2})
 		if err == nil {
-			var resultBlockByHash *Block
+			var resultBlockByHash *metawatch.Block
 			err = responseBlockByHash.GetObject(&resultBlockByHash)
 			if err == nil {
 				return c.Render(http.StatusOK, "block", echo.Map{
@@ -1093,13 +1094,13 @@ func main() {
 		defer rows.Close()
 
 		var (
-			resultHistory                    []*TransactionInfo
+			resultHistory                    []*metawatch.TransactionInfo
 			value, timestamp                 int64
 			transaction, toA, abstractMethod string
 		)
 
 		for rows.Next() {
-			tx := &TransactionInfo{}
+			tx := &metawatch.TransactionInfo{}
 			if err := rows.Scan(&timestamp, &transaction, &toA, &value, &abstractMethod); err != nil {
 				log.Fatal(err)
 			}
@@ -1144,11 +1145,11 @@ func main() {
 		}
 		defer rows.Close()
 
-		var resultHistory []*TransactionInfo
+		var resultHistory []*metawatch.TransactionInfo
 		var value, timestamp int64
 		var transaction, toA, abstractMethod string
 		for rows.Next() {
-			tx := &TransactionInfo{}
+			tx := &metawatch.TransactionInfo{}
 			if err := rows.Scan(&timestamp, &transaction, &toA, &value, &abstractMethod); err != nil {
 				log.Fatal(err)
 			}
@@ -1881,7 +1882,7 @@ func main() {
 				countTxsI = txLimit
 			}
 
-			responseHistory, err := rpcClientTorrent.Call("fetch-history", &HistoryArgs{Address: address, CountTxs: int64(countTxsI)})
+			responseHistory, err := rpcClientTorrent.Call("fetch-history", &metawatch.HistoryArgs{Address: address, CountTxs: int64(countTxsI)})
 
 			if err == nil {
 				return c.JSON(http.StatusOK, &responseHistory)
@@ -1998,9 +1999,9 @@ func main() {
 				err = connectMysql.Select(&nodes, `SELECT nodes.address, node_type, name, mg_trust, mg_geo, mg_roi, addresses.delegated_amount AS delegated_amount
 					FROM nodes
 					INNER JOIN addresses ON (nodes.address=addresses.address AND addresses.delegated_amount>= 100000*1e6 AND addresses.delegated_amount <= 10000000*1e6)
-					WHERE mg_status=1 AND mg_trust<>'0.001' AND mg_roi<>'0.000000'
+					WHERE mg_status=1 AND mg_trust<>'0.001' 
 					ORDER BY ROUND(delegated_amount/1e11,0) ASC, mg_trust DESC, mg_roi DESC
-					LIMIT 500`)
+					LIMIT 500`) // AND mg_roi<>'0.000000'
 				if err != nil {
 					log.Fatal(err.Error())
 				}
@@ -2091,12 +2092,12 @@ func updateAddress(address string) {
 
 func updatePrice() {
 
-	var args = []*CurrencyStatArgs{}
-	args = append(args, &CurrencyStatArgs{Type: "time24"})
+	var args = []*metawatch.CurrencyStatArgs{}
+	args = append(args, &metawatch.CurrencyStatArgs{Type: "time24"})
 
 	responseCurrencyStat, err := rpcClientWallet.CallWID("currency.stat", args)
 	if err == nil {
-		var resultCurrencyStat *CurrencyStatMulti
+		var resultCurrencyStat *metawatch.CurrencyStatMulti
 		err = responseCurrencyStat.GetObject(&resultCurrencyStat)
 
 		if err == nil && len(resultCurrencyStat.MHC) > 0 {

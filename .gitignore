@@ -2,3 +2,4 @@ cmd/explorer/explorer
 cmd/explorer/runner.conf
 cmd/explorer/tmp
 cmd/explorer/.env
+vendor/
